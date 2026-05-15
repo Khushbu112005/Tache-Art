@@ -1,0 +1,178 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --brand-burgundy: #8B1D1D;
+  --brand-gold: #D4AF37;
+  --tache-beige: #F9F7F5;
+  --tache-cream: #FDFBF7;
+  --tache-soft-brown: #A67C52;
+  --tache-accent: #f0f0f0;
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+
+  /* Animations */
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand-burgundy: var(--brand-burgundy);
+  --color-brand-gold: var(--brand-gold);
+  --color-tache-beige: var(--tache-beige);
+  --font-title: var(--font-playfair);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-selector-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-serif {
+  font-family: var(--font-asul), 'Asul', Georgia, serif;
+}
+
+/* Texture overlay for premium feel */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Better mobile tap targets */
+a,
+button {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Premium Page transitions */
+main {
+  animation: premiumFadeIn 1s var(--ease-expo);
+}
+
+@keyframes premiumFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brand-burgundy);
+  border-radius: 100px;
+}
+
+/* Utilities */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.hover-slide-up {
+  transition: transform 0.8s var(--ease-expo), opacity 0.8s var(--ease-expo);
+}
+
+.hover-slide-up:hover {
+  transform: translateY(-10px);
+}
+
+.text-reveal {
+  overflow: hidden;
+}
+
+.text-reveal-inner {
+  animation: revealText 1.4s var(--ease-expo) forwards;
+  transform: translateY(110%) skewY(5deg);
+  filter: blur(8px);
+  will-change: transform, filter;
+}
+
+@keyframes revealText {
+  to {
+    transform: translateY(0) skewY(0);
+    filter: blur(0);
+  }
+}
+
+/* Floating Animation */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.parallax-text {
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease-out;
+}
+
+.parallax-text:hover {
+  transform: translateY(-5px) scale(1.01);
+}
+
+/* Button gradient for upload form */
+.btn-gradient {
+  background: linear-gradient(135deg, var(--brand-burgundy) 0%, #6B1515 100%);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.btn-gradient:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
