@@ -6,8 +6,6 @@ import Artwork from "@/models/Artwork";
 import { Types } from "mongoose";
 import DeleteArtworkButton from "@/components/DeleteArtworkButton";
 import RazorpayCheckout from "@/components/payment/RazorpayCheckout";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
@@ -42,8 +40,6 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
     notFound();
   }
 
-  const session = await getServerSession(authOptions);
-
   const serializedArt = {
     _id: (artwork as Record<string, unknown>)._id?.toString() || "",
     title: (artwork as Record<string, unknown>).title as string,
@@ -70,12 +66,12 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-20 lg:gap-32 items-start">
           {/* Image Side */}
-          <div className="relative aspect-[4/5] bg-[#FBFBFB] shadow-2xl rounded-[24px] sm:rounded-[40px] overflow-hidden w-full transition-transform duration-700 hover:scale-[1.02]">
+          <div className="relative aspect-[4/5] bg-[#F9F8F6] shadow-2xl rounded-[24px] sm:rounded-[40px] overflow-hidden w-full transition-transform duration-700 hover:scale-[1.02]">
             <Image
               src={serializedArt.imageUrl}
               alt={serializedArt.title}
               fill
-              className="object-cover"
+              className="object-contain"
               sizes="(max-width: 1024px) 100vw, 50vw"
               priority
             />

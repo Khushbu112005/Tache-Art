@@ -2,8 +2,16 @@
 
 import { useState, useEffect } from "react";
 
+interface ContactMessage {
+    _id: string;
+    createdAt: string;
+    name: string;
+    email: string;
+    message: string;
+}
+
 export default function AdminMessages() {
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState<ContactMessage[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -46,7 +54,7 @@ export default function AdminMessages() {
                                     </td>
                                 </tr>
                             ) : (
-                                messages.map((msg: any) => (
+                                messages.map((msg: ContactMessage) => (
                                     <tr key={msg._id} className="hover:bg-gray-50 transition-colors align-top">
                                         <td className="px-6 py-4 w-48">
                                             <p className="text-xs text-gray-600 font-medium">

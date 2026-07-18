@@ -18,7 +18,7 @@ interface ArtworkCardProps {
 export default function ArtworkCard({ _id, title, imageUrl, price, description }: ArtworkCardProps) {
     const { data: session } = useSession();
     const router = useRouter();
-    const isAdmin = (session?.user as any)?.role === "admin";
+    const isAdmin = (session?.user as { role?: string })?.role === "admin";
     const [isHovered, setIsHovered] = useState(false);
 
     const handleDelete = async (e: React.MouseEvent) => {
@@ -52,13 +52,13 @@ export default function ArtworkCard({ _id, title, imageUrl, price, description }
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <Link href={`/artwork/${_id}`} className="block relative aspect-[3/4] overflow-hidden rounded-2xl bg-tache-beige">
+            <Link href={`/artwork/${_id}`} className="block relative aspect-[3/4] overflow-hidden rounded-2xl bg-[#F9F8F6]">
                 <Image
                     src={imageUrl}
                     alt={title}
                     fill
                     loading="lazy"
-                    className={`object-cover transition-transform duration-1000 ease-expo ${isHovered ? "scale-105" : "scale-100"}`}
+                    className={`object-contain transition-transform duration-1000 ease-expo ${isHovered ? "scale-105" : "scale-100"}`}
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
                 

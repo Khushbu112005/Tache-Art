@@ -5,8 +5,17 @@ import Image from "next/image";
 import { Plus, Trash2 } from "lucide-react";
 import { ARTWORK_CATEGORIES } from "@/utils/constants";
 
+interface Artwork {
+    _id: string;
+    title: string;
+    description: string;
+    imageUrl: string;
+    price: number;
+    category: string;
+}
+
 export default function AdminArtworks() {
-    const [artworks, setArtworks] = useState([]);
+    const [artworks, setArtworks] = useState<Artwork[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
@@ -155,7 +164,7 @@ export default function AdminArtworks() {
                 <div className="text-center py-20 text-gray-500 tracking-wider">LOADING...</div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {artworks.map((art: any) => (
+                    {artworks.map((art: Artwork) => (
                         <div key={art._id} className="bg-white border border-[var(--tache-beige)] rounded-sm shadow-sm overflow-hidden flex flex-col">
                             <div className="relative aspect-[4/5] bg-gray-100">
                                 <Image src={art.imageUrl} alt={art.title} fill className="object-cover" sizes="25vw" />

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 
 export default function ContactPage() {
     const [formData, setFormData] = useState({
@@ -43,7 +42,7 @@ export default function ContactPage() {
             } else {
                 setError(data.message || "Something went wrong. Please try again.");
             }
-        } catch (err) {
+        } catch {
             setError("Failed to connect to the server. Please check your internet connection.");
         } finally {
             setLoading(false);

@@ -4,11 +4,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
     const { data: session } = useSession();
     const [isOpen, setIsOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     return (
         <nav className="bg-white/90 backdrop-blur-md border-b border-gray-100 py-4 sm:py-5 sticky top-0 z-50">
@@ -45,25 +50,24 @@ export default function Navbar() {
                             CONTACT
                         </Link>
 
-                        {session ? (
-                            <div className="flex items-center space-x-10">
-                                {session.user?.role === "admin" && (
-                                    <Link href="/admin/artworks" className="text-[13px] tracking-[0.2em] font-medium text-brand-burgundy hover:opacity-70 transition-colors uppercase">
-                                        ADMIN
-                                    </Link>
-                                )}
-                                {session.user?.role === "customer" && (
-                                    <Link href="/profile" className="text-[13px] tracking-[0.2em] font-medium text-brand-burgundy hover:opacity-70 transition-colors uppercase">
-                                        MY ORDERS
-                                    </Link>
-                                )}
-                                <button
-                                    onClick={() => signOut()}
-                                    className="text-[9px] tracking-[0.25em] font-bold text-[#2E292E] border border-gray-100 px-4 py-2 hover:bg-[#2E292E] hover:text-white hover:border-[#2E292E] transition-all duration-300 rounded-full"
-                                >
-                                    LOGOUT
-                                </button>
-                            </div>
+                        {mounted && session?.user?.role === "admin" && (
+                            <Link href="/admin/artworks" className="text-[13px] tracking-[0.2em] font-medium text-brand-burgundy hover:opacity-70 transition-colors uppercase">
+                                ADMIN
+                            </Link>
+                        )}
+                        {mounted && session?.user?.role === "customer" && (
+                            <Link href="/profile" className="text-[13px] tracking-[0.2em] font-medium text-brand-burgundy hover:opacity-70 transition-colors uppercase">
+                                MY ORDERS
+                            </Link>
+                        )}
+
+                        {mounted && session ? (
+                            <button
+                                onClick={() => signOut()}
+                                className="text-[11px] tracking-[0.3em] font-bold text-[#2E292E] border border-gray-200 px-8 py-3 hover:bg-[#2E292E] hover:text-white hover:border-[#2E292E] transition-all duration-300 rounded-full"
+                            >
+                                LOGOUT
+                            </button>
                         ) : (
                             <Link
                                 href="/login"
@@ -125,7 +129,7 @@ export default function Navbar() {
 
                         <div className="w-12 h-px bg-brand-burgundy/10 mb-4" />
 
-                        {session ? (
+                        {mounted && (session ? (
                             <div className="flex flex-col items-center space-y-8">
                                 {session.user?.role === "admin" && (
                                     <Link
@@ -163,7 +167,7 @@ export default function Navbar() {
                             >
                                 LOGIN
                             </Link>
-                        )}
+                        ))}
                     </div>
                 </div>
             </div>

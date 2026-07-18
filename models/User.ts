@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models } from "mongoose";
+import { Schema, model, models } from "mongoose";
 
 const UserSchema = new Schema(
   {
@@ -13,9 +13,6 @@ const UserSchema = new Schema(
   },
   { timestamps: true }
 );
-
-// Index
-UserSchema.index({ email: 1 });
 
 const User = models.User || model("User", UserSchema);
 export default User;

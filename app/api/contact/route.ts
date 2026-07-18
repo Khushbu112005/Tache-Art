@@ -7,7 +7,7 @@ import { EmailService } from "@/services/email.service";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user?.role !== "admin") {

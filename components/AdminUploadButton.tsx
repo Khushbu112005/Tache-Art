@@ -10,7 +10,7 @@ export default function AdminUploadButton() {
     const [showForm, setShowForm] = useState(false);
 
     // Only show for admin
-    if (!session || (session.user as any)?.role !== "admin") {
+    if (!session || (session.user as { role?: string })?.role !== "admin") {
         return null;
     }
 

@@ -39,6 +39,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${asul.variable} ${playfair.variable} antialiased min-h-screen flex flex-col font-serif`}
+        suppressHydrationWarning
       >
         <Providers>
           <Navbar />

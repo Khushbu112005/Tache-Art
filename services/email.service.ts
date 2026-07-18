@@ -93,6 +93,49 @@ export class EmailService {
   }
 
   /**
+   * Send an admin notification email for a new order request
+   */
+  static async sendAdminOrderNotification(
+    name: string,
+    email: string,
+    orderId: string,
+    artworkType: string,
+    size: string,
+    message: string,
+    referenceImage?: string
+  ) {
+    const transporter = this.getTransporter();
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER,
+      to: process.env.ADMIN_EMAIL || process.env.EMAIL_SERVER_USER,
+      replyTo: email,
+      subject: `New Custom Order Request #${orderId.slice(-6).toUpperCase()} from ${name}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #8B1D1D;">New Order Request — TACHÈ</h2>
+          <hr style="border: 1px solid #f0f0f0;" />
+          <p><strong>Order ID:</strong> #${orderId.slice(-6).toUpperCase()}</p>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+          <p><strong>Artwork Type:</strong> ${artworkType}</p>
+          <p><strong>Preferred Size:</strong> ${size}</p>
+          <p><strong>Message / Vision:</strong></p>
+          <div style="background: #f9f7f5; padding: 16px; border-radius: 8px; margin-bottom: 15px;">
+            <p>${message.replace(/\n/g, "<br>")}</p>
+          </div>
+          ${
+            referenceImage
+              ? `<p><strong>Reference Image:</strong> <a href="${referenceImage}" target="_blank">View Reference Image</a></p>
+                 <div style="margin-top: 10px;"><img src="${referenceImage}" alt="Reference" style="max-width: 100%; border-radius: 4px;" /></div>`
+              : ""
+          }
+        </div>
+      `,
+    });
+  }
+
+  /**
    * Generic send
    */
   static async send(options: EmailOptions) {

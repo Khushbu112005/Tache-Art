@@ -45,7 +45,7 @@ export default function Footer() {
                             <a href="https://wa.me/919321449323" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-brand-burgundy transition-colors">
                                 <FaWhatsapp size={20} />
                             </a>
-                            <a href="mailto:aasthajainokok@gmail.com" className="text-gray-400 hover:text-brand-burgundy transition-colors">
+                            <a href="https://mail.google.com/mail/?view=cm&to=aasthajainokok@gmail.com" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-brand-burgundy transition-colors">
                                 <Mail size={20} />
                             </a>
                         </div>

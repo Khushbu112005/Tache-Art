@@ -15,7 +15,7 @@ export default function DeleteArtworkButton({ artworkId, artworkTitle }: DeleteA
     const router = useRouter();
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const isAdmin = (session?.user as any)?.role === "admin";
+    const isAdmin = (session?.user as { role?: string })?.role === "admin";
 
     if (!isAdmin) return null;
 

@@ -35,7 +35,7 @@ export default async function Home() {
           <div className="relative">
 
 
-            <h1 className="text-4xl sm:text-7xl md:text-9xl font-bold tracking-[0.1em] sm:tracking-[0.15em] text-[#2E292E] uppercase leading-tight parallax-text">
+            <h1 className="text-xl sm:text-7xl md:text-9xl font-bold tracking-[0.1em] sm:tracking-[0.15em] text-[#2E292E] uppercase leading-tight parallax-text">
               TACHÈ <span className="text-brand-burgundy relative inline-block">
                 ART
                 <div className="absolute -bottom-1 sm:-bottom-2 left-0 w-full h-1 bg-brand-burgundy/20 rounded-full" />
@@ -43,7 +43,7 @@ export default async function Home() {
             </h1>
           </div>
 
-          <p className="text-xs sm:text-base md:text-xl font-medium tracking-[0.2em] sm:tracking-[0.25em] text-gray-400 uppercase max-w-3xl mx-auto leading-relaxed italic opacity-80">
+          <p className="text-sm sm:text-base md:text-xl font-medium tracking-[0.2em] sm:tracking-[0.25em] text-gray-400 uppercase max-w-3xl mx-auto leading-relaxed italic opacity-80">
             Raw Hand-painted masterpieces crafted for modern spaces.
           </p>
 
@@ -132,16 +132,14 @@ export default async function Home() {
       {/* Featured Artworks */}
       <section className="py-24 sm:py-32 px-6 sm:px-10 lg:px-20 bg-white">
         <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
-            <div className="space-y-4">
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-[0.1em] uppercase text-brand-burgundy">Featured Selection</h2>
-              <div className="h-1 w-20 bg-brand-burgundy/10" />
-            </div>
+          <div className="flex flex-row items-center gap-10 mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-[0.1em] uppercase text-brand-burgundy whitespace-nowrap">Our Featured Section</h2>
+            <div className="h-px flex-1 bg-brand-burgundy/10" />
             <Link
               href="/gallery"
-              className="group flex items-center space-x-4 text-[11px] font-bold tracking-[0.3em] text-gray-400 hover:text-brand-burgundy transition-colors uppercase"
+              className="group flex items-center gap-4 text-[11px] font-bold tracking-[0.3em] text-gray-400 hover:text-brand-burgundy transition-colors uppercase whitespace-nowrap"
             >
-              <span>Explore All</span>
+              <span className="text-2xl">Explore All</span>
               <div className="w-10 h-px bg-gray-200 group-hover:bg-brand-burgundy transition-colors" />
             </Link>
           </div>
@@ -239,7 +237,7 @@ export default async function Home() {
 
               <div className="space-y-6 text-sm sm:text-base text-gray-500 font-medium leading-loose tracking-wide">
                 <p>
-                  Welcome to TACHÈ, where art isn't just decoration—it's an experience. Founded by Aastha Jain, our studio focuses on the raw intersection of emotion and canvas.
+                  Welcome to TACHÈ, where art isn&apos;t just decoration—it&apos;s an experience. Founded by Aastha Jain, our studio focuses on the raw intersection of emotion and canvas.
                 </p>
                 <p>
                   Specializing in custom hand-painted portraits and abstract movements, we believe your space should reflect the uniqueness of your journey.

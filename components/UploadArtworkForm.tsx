@@ -69,8 +69,8 @@ export default function UploadArtworkForm({ onClose }: { onClose: () => void }) 
 
             onClose();
             router.refresh();
-        } catch (err: any) {
-            setError(err.message || "Something went wrong");
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Something went wrong");
         } finally {
             setLoading(false);
         }
@@ -104,12 +104,12 @@ export default function UploadArtworkForm({ onClose }: { onClose: () => void }) 
                             IMAGE
                         </label>
                         {imagePreview ? (
-                            <div className="relative aspect-[4/3] rounded-md overflow-hidden border border-gray-200">
+                            <div className="relative aspect-[4/3] rounded-md overflow-hidden border border-gray-200 bg-[#F9F8F6]">
                                 <Image
                                     src={imagePreview}
                                     alt="Preview"
                                     fill
-                                    className="object-cover"
+                                    className="object-contain"
                                 />
                                 <button
                                     type="button"

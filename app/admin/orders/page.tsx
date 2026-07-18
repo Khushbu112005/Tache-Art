@@ -2,8 +2,20 @@
 
 import { useState, useEffect } from "react";
 
+interface Order {
+    _id: string;
+    artworkType: string;
+    size: string;
+    createdAt: string;
+    name: string;
+    email: string;
+    message: string;
+    referenceImage?: string;
+    status: string;
+}
+
 export default function AdminOrders() {
-    const [orders, setOrders] = useState([]);
+    const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -62,7 +74,7 @@ export default function AdminOrders() {
                                     </td>
                                 </tr>
                             ) : (
-                                orders.map((order: any) => (
+                                orders.map((order: Order) => (
                                     <tr key={order._id} className="hover:bg-gray-50 transition-colors align-top">
                                         <td className="px-6 py-4">
                                             <p className="text-sm font-bold text-black uppercase">{order.artworkType}</p>

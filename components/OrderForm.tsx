@@ -60,8 +60,8 @@ function OrderFormComponent() {
 
             setSuccess(true);
             window.scrollTo(0, 0);
-        } catch (err: any) {
-            setError(err.message || "An error occurred");
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "An error occurred");
         } finally {
             setLoading(false);
         }
@@ -140,10 +140,10 @@ function OrderFormComponent() {
                             onChange={(e) => setFormData({ ...formData, size: e.target.value })}
                             className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-1 focus:ring-[var(--tache-soft-brown)] focus:border-[var(--tache-soft-brown)] bg-[var(--tache-cream)]"
                         >
-                            <option value="Small (18x24)">Small (18x24")</option>
-                            <option value="Medium (24x36)">Medium (24x36")</option>
-                            <option value="Large (36x48)">Large (36x48")</option>
-                            <option value="Extra Large (48x60)">Extra Large (48x60")</option>
+                            <option value="Small (18x24)">Small (18x24&quot;)</option>
+                            <option value="Medium (24x36)">Medium (24x36&quot;)</option>
+                            <option value="Large (36x48)">Large (36x48&quot;)</option>
+                            <option value="Extra Large (48x60)">Extra Large (48x60&quot;)</option>
                             <option value="Custom">Custom Size</option>
                         </select>
                     </div>

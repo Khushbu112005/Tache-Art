@@ -38,7 +38,7 @@ export default function LoginForm() {
                 router.push("/");
                 router.refresh();
             }
-        } catch (err) {
+        } catch {
             setError("An unexpected error occurred");
             setLoading(false);
         }
@@ -91,7 +91,7 @@ export default function LoginForm() {
                 router.push("/");
                 router.refresh();
             }
-        } catch (err) {
+        } catch {
             setError("An unexpected error occurred");
             setLoading(false);
         }
