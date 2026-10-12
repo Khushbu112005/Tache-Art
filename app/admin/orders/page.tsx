@@ -201,12 +201,19 @@ export default function AdminOrders() {
     }
   };
 
+  // Only actual purchase/store orders (Custom Requests are managed under Messages)
+  const storeOrders = orders.filter(
+    (o) =>
+      o.artworkType !== "Custom Request" &&
+      o.artworkType !== "Other"
+  );
+
   // Filtered orders
-  const pendingVerificationCount = orders.filter(
+  const pendingVerificationCount = storeOrders.filter(
     (o) => o.status === "payment_pending_verification"
   ).length;
 
-  const filteredOrders = orders.filter((order) => {
+  const filteredOrders = storeOrders.filter((order) => {
     const matchesTab =
       activeTab === "all"
         ? true
@@ -283,7 +290,7 @@ export default function AdminOrders() {
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
-            All Orders ({orders.length})
+            All Orders ({storeOrders.length})
           </button>
 
           <button

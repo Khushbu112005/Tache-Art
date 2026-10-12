@@ -6,9 +6,12 @@ import { NotFoundError } from "@/utils/apiResponse";
 import { EmailService } from "@/services/email.service";
 
 export class OrderService {
-  static async getAll() {
+  static async getAll(excludeCustom = true) {
     await dbConnect();
-    return Order.find({})
+    const filter = excludeCustom
+      ? { artworkType: { $nin: ["Custom Request", "Other"] } }
+      : {};
+    return Order.find(filter)
       .populate("artworkId", "title price imageUrl")
       .populate("paymentId", "utrNumber screenshotUrl status paymentMethod")
       .sort({ createdAt: -1 })
@@ -110,14 +113,15 @@ export class OrderService {
 
   static async getStats() {
     await dbConnect();
+    const baseFilter = { artworkType: { $nin: ["Custom Request", "Other"] } };
     const [total, pending, paymentPendingVerification, inProgress, completed, cancelled] =
       await Promise.all([
-        Order.countDocuments(),
-        Order.countDocuments({ status: "pending" }),
-        Order.countDocuments({ status: "payment_pending_verification" }),
-        Order.countDocuments({ status: "in-progress" }),
-        Order.countDocuments({ status: "completed" }),
-        Order.countDocuments({ status: "cancelled" }),
+        Order.countDocuments(baseFilter),
+        Order.countDocuments({ ...baseFilter, status: "pending" }),
+        Order.countDocuments({ ...baseFilter, status: "payment_pending_verification" }),
+        Order.countDocuments({ ...baseFilter, status: "in-progress" }),
+        Order.countDocuments({ ...baseFilter, status: "completed" }),
+        Order.countDocuments({ ...baseFilter, status: "cancelled" }),
       ]);
     return { total, pending, paymentPendingVerification, inProgress, completed, cancelled };
   }
@@ -125,7 +129,10 @@ export class OrderService {
 
   static async getRecent(limit = 5) {
     await dbConnect();
-    return Order.find().sort({ createdAt: -1 }).limit(limit).lean();
+    return Order.find({ artworkType: { $nin: ["Custom Request", "Other"] } })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
   }
 
   static async getMonthlyStats(months = 6) {
