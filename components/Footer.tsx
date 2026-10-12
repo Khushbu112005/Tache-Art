@@ -125,7 +125,7 @@ export default function Footer() {
                 </div>
 
                 {/* Copyright */}
-                <div className="mt-20 pt-10 border-t border-gray-50 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-[10px] tracking-[0.2em] font-bold text-gray-300 uppercase">
+                <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0 text-[10px] tracking-[0.2em] font-bold text-gray-300 uppercase">
                     <p>
                         &copy; {new Date().getFullYear()} TACHÈ. ALL RIGHTS RESERVED.
                     </p>
