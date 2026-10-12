@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { OrderService } from "@/services/order.service";
 import { EmailService } from "@/services/email.service";
+import Message from "@/models/Message";
 import {
   successResponse,
   errorResponse,
@@ -51,8 +52,25 @@ export async function POST(req: NextRequest) {
 
     const order = await OrderService.create(data);
 
-    // --- Added Integrations for Email and FormSubmit ---
+    // Save to Message collection so it appears in Admin Messages
     const { name, email, artworkType, size, message, referenceImage } = data;
+    try {
+      await Message.create({
+        name,
+        email,
+        message: message || `Custom order inquiry for ${artworkType}`,
+        source: "custom_request",
+        artworkType: artworkType || "Custom Request",
+        size: size || "Standard (24x36)",
+        referenceImage: referenceImage as string | undefined,
+        orderId: order._id,
+      });
+      console.log(`[Order] Custom request saved to Message collection for: ${name}`);
+    } catch (msgErr) {
+      console.error("[Order] Failed to save custom request to Message collection:", msgErr);
+    }
+
+    // --- Added Integrations for Email and FormSubmit ---
     const orderId = order._id.toString();
 
     // 1. SMTP Email notifications (Gmail via Nodemailer)

@@ -18,12 +18,46 @@ const messageSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    source: {
+      type: String,
+      enum: ["contact", "custom_request"],
+      default: "contact",
+    },
+    artworkType: {
+      type: String,
+      default: null,
+    },
+    size: {
+      type: String,
+      default: null,
+    },
+    referenceImage: {
+      type: String,
+      default: null,
+    },
+    orderId: {
+      type: Schema.Types.ObjectId,
+      ref: "Order",
+      default: null,
+    },
+    repliedAt: {
+      type: Date,
+      default: null,
+    },
+    repliedSubject: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const Message = models.Message || model("Message", messageSchema);
+if (models.Message) {
+  delete (models as Record<string, unknown>).Message;
+}
+
+const Message = model("Message", messageSchema);
 
 export default Message;

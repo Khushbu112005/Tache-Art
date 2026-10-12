@@ -15,8 +15,82 @@ export async function GET() {
     }
 
     await dbConnect();
+
+    // Auto-sync any existing custom order inquiries into Message collection so past requests appear
+    try {
+      const Order = (await import("@/models/Order")).default;
+      const unSyncedOrders = await Order.find({
+        message: { $exists: true, $ne: "" },
+      }).lean();
+
+      for (const ord of unSyncedOrders) {
+        const alreadyExists = await Message.findOne({
+          $or: [
+            { orderId: ord._id },
+            { email: ord.email, message: ord.message },
+          ],
+        });
+        if (!alreadyExists) {
+          await Message.create({
+            name: ord.name,
+            email: ord.email,
+            message: ord.message,
+            source: "custom_request",
+            artworkType: ord.artworkType || "Custom Request",
+            size: ord.size || "Standard",
+            referenceImage: ord.referenceImage || undefined,
+            orderId: ord._id,
+            createdAt: ord.createdAt,
+          });
+        }
+      }
+    } catch (syncErr) {
+      console.error("[Contact GET] Sync existing orders note:", syncErr);
+    }
+
     const messages = await Message.find({}).sort({ createdAt: -1 }).lean();
     return successResponse(messages);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user?.role !== "admin") {
+      return errorResponse("Unauthorized", 401);
+    }
+
+    const { id, isRead } = await req.json();
+    if (!id) return errorResponse("Message ID required", 400);
+
+    await dbConnect();
+    const updated = await Message.findByIdAndUpdate(
+      id,
+      { isRead: !!isRead },
+      { new: true }
+    );
+    return successResponse(updated);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user?.role !== "admin") {
+      return errorResponse("Unauthorized", 401);
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (!id) return errorResponse("Message ID required", 400);
+
+    await dbConnect();
+    await Message.findByIdAndDelete(id);
+    return messageResponse("Message deleted successfully");
   } catch (error) {
     return handleApiError(error);
   }
