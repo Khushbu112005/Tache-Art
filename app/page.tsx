@@ -1,7 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Metadata } from "next";
 import { ArtworkService } from "@/services/artwork.service";
 import ArtworkCard from "@/components/ArtworkCard";
+
+export const metadata: Metadata = {
+  title: "TACHÈ",
+};
 
 export const revalidate = 60; // Revalidate every 60 seconds
 

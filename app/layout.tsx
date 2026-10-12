@@ -19,8 +19,17 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "TACHÈ | Custom Art Portfolio",
+  title: "TACHÈ",
   description: "Raw. Hand-painted. Custom art by Aastha Jain. Hand-crafted paintings, portraits, and custom artwork.",
+  icons: {
+    icon: [
+      { url: "/logo.jpg" },
+      { url: "/logo.jpg", sizes: "32x32", type: "image/jpeg" },
+      { url: "/logo.jpg", sizes: "16x16", type: "image/jpeg" },
+    ],
+    shortcut: "/logo.jpg",
+    apple: "/logo.jpg",
+  },
 };
 
 export const viewport: Viewport = {
