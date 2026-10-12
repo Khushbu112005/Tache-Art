@@ -37,27 +37,39 @@ const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
 async function createAdmin() {
   const args = process.argv.slice(2);
-  const email = args[0] || "admin@tacheart.com";
-  const password = args[1] || "AdminPass123!";
-  const name = args[2] || "Admin";
+  let adminEmail = process.env.ADMIN_EMAIL;
+  let adminPassword = process.env.ADMIN_PASSWORD;
+  let adminName = process.env.ADMIN_NAME;
+
+  try {
+    const envPath = path.join(__dirname, "..", ".env");
+    const envContent = fs.readFileSync(envPath, "utf8");
+    const mEmail = envContent.match(/^ADMIN_EMAIL=(.+)$/m);
+    if (mEmail && !adminEmail) adminEmail = mEmail[1].trim();
+    const mPass = envContent.match(/^ADMIN_PASSWORD=(.+)$/m);
+    if (mPass && !adminPassword) adminPassword = mPass[1].trim();
+    const mName = envContent.match(/^ADMIN_NAME=(.+)$/m);
+    if (mName && !adminName) adminName = mName[1].trim();
+  } catch (e) {}
+
+  const email = (args[0] || adminEmail || "admin@tacheart.com").toLowerCase().trim();
+  const password = args[1] || adminPassword || "AdminPass123!";
+  const name = args[2] || adminName || "Admin";
 
   try {
     await mongoose.connect(MONGODB_URI);
     console.log("Connected to MongoDB...");
 
+    const hashedPassword = await bcrypt.hash(password, 10);
     const existing = await User.findOne({ email: email.toLowerCase() });
     if (existing) {
-      if (existing.role !== "admin") {
-        existing.role = "admin";
-        await existing.save();
-        console.log(`Updated user ${email} to 'admin' role.`);
-      } else {
-        console.log(`Admin user with email "${email}" already exists.`);
-      }
+      existing.role = "admin";
+      existing.name = name;
+      existing.password = hashedPassword;
+      await existing.save();
+      console.log(`Updated admin credentials for ${email}.`);
       process.exit(0);
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
     const admin = new User({
       name,
       email: email.toLowerCase(),
