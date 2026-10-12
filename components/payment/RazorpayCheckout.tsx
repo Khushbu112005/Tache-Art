@@ -154,7 +154,7 @@ export default function RazorpayCheckout({
         <h3 className="text-lg font-bold tracking-widest uppercase text-[#2E292E]">Payment Successful</h3>
         <p className="text-sm text-gray-500">Thank you for your purchase! We&apos;ll be in touch shortly.</p>
         <button
-          onClick={() => router.push("/profile")}
+          onClick={() => router.push("/user/orders")}
           className="px-8 py-3 bg-brand-burgundy text-white text-[11px] font-bold tracking-[0.3em] uppercase hover:bg-[#2E292E] transition-all duration-500 rounded-full"
         >
           View My Orders

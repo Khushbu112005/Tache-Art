@@ -84,6 +84,23 @@ export function validatePaymentVerification(data: Record<string, unknown>): Vali
   return { valid: errors.length === 0, errors };
 }
 
+export function validateManualUpiPayment(data: Record<string, unknown>): ValidationResult {
+  const errors: string[] = [];
+
+  if (!isNonEmptyString(data.name)) errors.push("Customer name is required");
+  if (!isValidEmail(data.email)) errors.push("Valid customer email is required");
+  if (!isNonEmptyString(data.phone)) errors.push("Phone number is required");
+  if (!isPositiveNumber(data.amount)) errors.push("Payment amount must be greater than zero");
+  if (!isNonEmptyString(data.utrNumber)) errors.push("12-digit UTR / UPI Transaction Reference is required");
+  else if (typeof data.utrNumber === "string" && data.utrNumber.trim().length < 6) {
+    errors.push("UTR / Transaction ID is too short");
+  }
+  if (!isNonEmptyString(data.screenshotUrl)) errors.push("Payment screenshot receipt is required");
+
+  return { valid: errors.length === 0, errors };
+}
+
+
 // ─── File Validation ───
 
 const ALLOWED_IMAGE_TYPES = [

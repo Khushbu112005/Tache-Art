@@ -98,7 +98,7 @@ export default function LoginForm() {
     };
 
     return (
-        <div className="w-full max-w-md mx-auto p-8 bg-white shadow-sm border border-[var(--tache-beige)] rounded-md">
+        <div className="w-full max-w-md mx-auto p-5 sm:p-8 bg-white shadow-sm border border-[var(--tache-beige)] rounded-xl sm:rounded-2xl">
             <h2 className="text-2xl font-bold tracking-widest text-center mb-2 uppercase">
                 {mode === "login" ? "Sign In" : "Create Account"}
             </h2>

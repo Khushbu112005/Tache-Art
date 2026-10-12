@@ -4,11 +4,18 @@ import bcrypt from "bcryptjs";
 import { ConflictError, NotFoundError } from "@/utils/apiResponse";
 
 export class UserService {
-  static async create(name: string, email: string, password: string) {
+  static async create(
+    name: string,
+    email: string,
+    password: string,
+    role: "customer" | "admin" = "customer"
+  ) {
     await dbConnect();
 
+    const normalizedEmail = email.toLowerCase();
+
     // Check if user already exists
-    const existing = await User.findOne({ email });
+    const existing = await User.findOne({ email: normalizedEmail });
     if (existing) {
       throw new ConflictError("An account with this email already exists");
     }
@@ -17,9 +24,9 @@ export class UserService {
 
     const user = new User({
       name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
-      role: "customer",
+      role,
     });
 
     await user.save();

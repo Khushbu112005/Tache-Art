@@ -1,6 +1,7 @@
 // ─── Order Statuses ───
 export const ORDER_STATUSES = [
   "pending",
+  "payment_pending_verification",
   "in-progress",
   "completed",
   "cancelled",
@@ -43,14 +44,21 @@ export const ARTWORK_MEDIUMS = [
 // ─── Payment Statuses ───
 export const PAYMENT_STATUSES = [
   "created",
+  "pending_verification",
   "paid",
   "failed",
   "refunded",
+  "rejected",
 ] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 
 // ─── Currency ───
 export const DEFAULT_CURRENCY = "INR";
+
+// ─── UPI Defaults ───
+export const DEFAULT_UPI_ID = process.env.NEXT_PUBLIC_UPI_ID || "aasthajainokok@oksbi";
+export const DEFAULT_UPI_NAME = process.env.NEXT_PUBLIC_UPI_NAME || "AASTHA JAIN";
+export const DEFAULT_UPI_QR_IMAGE = process.env.NEXT_PUBLIC_UPI_QR_IMAGE || "/upi-qr.jpg";
 
 // ─── Pagination ───
 export const DEFAULT_PAGE_SIZE = 12;
@@ -59,3 +67,4 @@ export const MAX_PAGE_SIZE = 50;
 // ─── User Roles ───
 export const USER_ROLES = ["admin", "customer"] as const;
 export type UserRole = (typeof USER_ROLES)[number];
+

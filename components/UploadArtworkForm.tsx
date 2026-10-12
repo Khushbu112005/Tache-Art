@@ -14,7 +14,28 @@ export default function UploadArtworkForm({ onClose }: { onClose: () => void }) 
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [uploadStatus, setUploadStatus] = useState("");
     const [error, setError] = useState("");
+
+    // Compress image on canvas before uploading
+    const compressImage = (file: File, maxPx = 2000, quality = 0.85): Promise<File> => {
+        return new Promise((resolve) => {
+            const img = new window.Image();
+            img.onload = () => {
+                const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+                const canvas = document.createElement("canvas");
+                canvas.width = Math.round(img.width * scale);
+                canvas.height = Math.round(img.height * scale);
+                canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob(
+                    (blob) => resolve(blob ? new File([blob], file.name, { type: "image/jpeg" }) : file),
+                    "image/jpeg",
+                    quality
+                );
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -35,9 +56,14 @@ export default function UploadArtworkForm({ onClose }: { onClose: () => void }) 
         setError("");
 
         try {
-            // 1. Upload image
+            // 1. Compress image before upload
+            setUploadStatus("Compressing...");
+            const compressed = await compressImage(imageFile);
+
+            // 2. Upload image
+            setUploadStatus("Uploading...");
             const formData = new FormData();
-            formData.append("file", imageFile);
+            formData.append("file", compressed);
 
             const uploadRes = await fetch("/api/upload", {
                 method: "POST",
@@ -77,21 +103,21 @@ export default function UploadArtworkForm({ onClose }: { onClose: () => void }) 
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-gradient-to-br from-white to-[var(--tache-cream)]/80 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-[var(--tache-beige)]/30">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-gradient-to-br from-white to-[var(--tache-cream)]/80 rounded-2xl w-full max-w-lg max-h-[95vh] overflow-y-auto shadow-2xl border border-[var(--tache-beige)]/30 my-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                    <h2 className="text-xl font-bold tracking-widest uppercase">Upload Artwork</h2>
+                <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+                    <h2 className="text-lg sm:text-xl font-bold tracking-widest uppercase">Upload Artwork</h2>
                     <button
                         onClick={onClose}
                         className="text-gray-400 hover:text-black transition-colors"
                     >
-                        <X size={24} />
+                        <X size={20} />
                     </button>
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-5">
                     {error && (
                         <div className="bg-red-50 text-red-500 p-3 rounded-sm text-sm border border-red-100 text-center">
                             {error}
@@ -204,7 +230,7 @@ export default function UploadArtworkForm({ onClose }: { onClose: () => void }) 
                         className="w-full btn-gradient text-white py-4 text-sm font-medium tracking-widest uppercase disabled:opacity-50 rounded-lg flex items-center justify-center gap-2"
                     >
                         <Upload size={18} />
-                        {loading ? "Uploading..." : "Upload Artwork"}
+                        {loading ? uploadStatus || "Processing..." : "Upload Artwork"}
                     </button>
                 </form>
             </div>

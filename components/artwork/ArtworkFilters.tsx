@@ -77,8 +77,8 @@ export default function ArtworkFilters({
 
       {/* Filter Options */}
       {showFilters && (
-        <div className="flex flex-wrap gap-4 items-center bg-[#FBFBFB] p-6 rounded-2xl border border-gray-100 animate-[premiumFadeIn_0.3s_ease]">
-          <div className="flex-1 min-w-[200px]">
+        <div className="flex flex-wrap gap-4 items-center bg-[#FBFBFB] p-4 sm:p-6 rounded-2xl border border-gray-100 animate-[premiumFadeIn_0.3s_ease]">
+          <div className="flex-1 min-w-[130px] sm:min-w-[200px]">
             <label className="block text-[10px] font-bold tracking-[0.3em] text-gray-400 uppercase mb-2">
               Category
             </label>
@@ -96,7 +96,7 @@ export default function ArtworkFilters({
             </select>
           </div>
 
-          <div className="flex-1 min-w-[200px]">
+          <div className="flex-1 min-w-[130px] sm:min-w-[200px]">
             <label className="block text-[10px] font-bold tracking-[0.3em] text-gray-400 uppercase mb-2">
               Sort By
             </label>

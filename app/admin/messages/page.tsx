@@ -34,7 +34,7 @@ export default function AdminMessages() {
 
     return (
         <div>
-            <h1 className="text-3xl font-bold tracking-widest uppercase text-black mb-8">Contact Messages</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-widest uppercase text-black mb-6 sm:mb-8">Contact Messages</h1>
 
             <div className="bg-white rounded-sm shadow-sm border border-[var(--tache-beige)] overflow-hidden">
                 <div className="overflow-x-auto">

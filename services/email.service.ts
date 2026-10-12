@@ -136,6 +136,50 @@ export class EmailService {
   }
 
   /**
+   * Send an order status update email
+   */
+  static async sendStatusUpdateEmail(
+    email: string,
+    name: string,
+    orderId: string,
+    artworkType: string,
+    newStatus: string
+  ) {
+    const transporter = this.getTransporter();
+
+    let statusMessage = "";
+    if (newStatus === "in-progress") {
+      statusMessage = "Good news! We have started working on your custom request.";
+    } else if (newStatus === "completed") {
+      statusMessage = "Your custom artwork is completed and ready!";
+    } else if (newStatus === "cancelled") {
+      statusMessage = "Your order request has been cancelled.";
+    } else {
+      statusMessage = `Your order status has been updated to: ${newStatus}`;
+    }
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER,
+      to: email,
+      subject: `Order Update: ${newStatus.toUpperCase()} — TACHÈ #${orderId.slice(-6).toUpperCase()}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #8B1D1D;">Order Update</h2>
+          <p>Hi ${name},</p>
+          <p>${statusMessage}</p>
+          <hr style="border: 1px solid #f0f0f0;" />
+          <p><strong>Order ID:</strong> #${orderId.slice(-6).toUpperCase()}</p>
+          <p><strong>Type:</strong> ${artworkType}</p>
+          <p><strong>New Status:</strong> ${newStatus.toUpperCase()}</p>
+          <hr style="border: 1px solid #f0f0f0;" />
+          <p style="color: #666;">You can view the full details on your Buyer Registry page.</p>
+          <p style="color: #8B1D1D; font-weight: bold;">— TACHÈ Art Studio</p>
+        </div>
+      `,
+    });
+  }
+
+  /**
    * Generic send
    */
   static async send(options: EmailOptions) {

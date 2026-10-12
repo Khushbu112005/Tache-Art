@@ -36,14 +36,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="max-w-full">
       <body
-        className={`${asul.variable} ${playfair.variable} antialiased min-h-screen flex flex-col font-serif`}
+        className={`${asul.variable} ${playfair.variable} antialiased min-h-screen flex flex-col font-serif w-full max-w-full`}
         suppressHydrationWarning
       >
         <Providers>
           <Navbar />
-          <main className="flex-grow">{children}</main>
+          <div className="flex-grow w-full max-w-full pt-[5.5rem] sm:pt-[6rem]">{children}</div>
           <Footer />
         </Providers>
       </body>

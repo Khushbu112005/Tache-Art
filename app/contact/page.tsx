@@ -51,7 +51,7 @@ export default function ContactPage() {
 
     return (
         <div className="min-h-screen bg-white">
-            <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-3xl">
+            <section className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 sm:py-24 max-w-3xl">
                 {/* Intro Text */}
                 <div className="text-center mb-12">
                     <p className="text-lg text-[#6b3a3a] leading-relaxed mb-10">
@@ -122,7 +122,7 @@ export default function ContactPage() {
 
                         {/* Submit Button */}
                         <div>
-                            <button type="submit" disabled={loading} className={`px-8 py-3 bg-[#a8584c] text-white text-base font-semibold rounded-full hover:bg-[#8f4a3f] transition-colors tracking-wide ${loading ? "opacity-70 cursor-not-allowed" : ""}`}>
+                            <button type="submit" disabled={loading} className={`w-full sm:w-auto px-8 py-3 bg-[#a8584c] text-white text-base font-semibold rounded-full hover:bg-[#8f4a3f] transition-colors tracking-wide ${loading ? "opacity-70 cursor-not-allowed" : ""}`}>
                                 {loading ? "Sending..." : "Send message"}
                             </button>
                         </div>

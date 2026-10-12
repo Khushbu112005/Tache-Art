@@ -44,21 +44,26 @@ export class UploadService {
       return `/uploads/${filename}`;
     }
 
-    // Convert file to base64 data URL for Cloudinary
-    const base64 = buffer.toString("base64");
-    const dataUrl = `data:${file.type};base64,${base64}`;
-
-    // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload(dataUrl, {
-      folder: "tache-artworks",
-      resource_type: "image",
-      transformation: [
-        { quality: "auto:best" },
-        { fetch_format: "auto" },
-      ],
+    // Upload to Cloudinary via stream (much faster than base64)
+    const uploadResult = await new Promise<{ secure_url: string }>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: "tache-artworks",
+          resource_type: "image",
+          transformation: [
+            { quality: "auto:good" },
+            { fetch_format: "auto" },
+          ],
+        },
+        (error, result) => {
+          if (error || !result) return reject(error ?? new Error("Upload failed"));
+          resolve(result as { secure_url: string });
+        }
+      );
+      uploadStream.end(buffer);
     });
 
-    return result.secure_url;
+    return uploadResult.secure_url;
   }
 
   /**

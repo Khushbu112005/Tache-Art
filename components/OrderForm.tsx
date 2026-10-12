@@ -24,6 +24,25 @@ function OrderFormComponent() {
 
     const [imageFile, setImageFile] = useState<File | null>(null);
 
+    const compressImage = (file: File, maxPx = 2000, quality = 0.85): Promise<File> => {
+        return new Promise((resolve) => {
+            const img = new window.Image();
+            img.onload = () => {
+                const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+                const canvas = document.createElement("canvas");
+                canvas.width = Math.round(img.width * scale);
+                canvas.height = Math.round(img.height * scale);
+                canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob(
+                    (blob) => resolve(blob ? new File([blob], file.name, { type: "image/jpeg" }) : file),
+                    "image/jpeg",
+                    quality
+                );
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -33,8 +52,10 @@ function OrderFormComponent() {
             let imageUrl = "";
 
             if (imageFile) {
+                // Compress image before upload to prevent 500 errors on large files
+                const compressed = await compressImage(imageFile);
                 const formDataUpload = new FormData();
-                formDataUpload.append("file", imageFile);
+                formDataUpload.append("file", compressed);
 
                 const uploadRes = await fetch("/api/upload", {
                     method: "POST",
@@ -85,7 +106,7 @@ function OrderFormComponent() {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="bg-gradient-to-br from-white to-[var(--tache-cream)]/50 p-8 md:p-12 border border-[var(--tache-beige)]/50 rounded-xl shadow-lg">
+        <form onSubmit={handleSubmit} className="bg-gradient-to-br from-white to-[var(--tache-cream)]/50 p-5 sm:p-8 md:p-12 border border-[var(--tache-beige)]/50 rounded-2xl shadow-lg">
             {error && (
                 <div className="bg-red-50 text-red-500 p-4 mb-6 rounded-sm text-sm border border-red-100 text-center uppercase tracking-wide">
                     {error}
@@ -190,7 +211,7 @@ function OrderFormComponent() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-fit px-16 py-4 mt-8 bg-brand-burgundy text-white text-[11px] font-bold tracking-[0.4em] uppercase hover:bg-[#2E292E] transition-all duration-700 shadow-xl shadow-brand-burgundy/20 rounded-full disabled:opacity-50"
+                        className="w-full sm:w-auto px-8 sm:px-16 py-4 mt-6 sm:mt-8 bg-brand-burgundy text-white text-[10px] sm:text-[11px] font-bold tracking-[0.25em] sm:tracking-[0.4em] uppercase hover:bg-[#2E292E] transition-all duration-500 shadow-xl shadow-brand-burgundy/20 rounded-full disabled:opacity-50 text-center"
                     >
                         {loading ? "Submitting Request..." : "Submit Order Request"}
                     </button>

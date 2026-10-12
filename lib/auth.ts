@@ -4,10 +4,6 @@ import bcrypt from "bcryptjs";
 import dbConnect from "./mongodb";
 import User from "@/models/User";
 
-// Admin credentials from environment
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -21,25 +17,12 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
-        // Check if admin (env-based, no hardcoded values)
-        if (
-          ADMIN_EMAIL &&
-          ADMIN_PASSWORD &&
-          credentials.email === ADMIN_EMAIL &&
-          credentials.password === ADMIN_PASSWORD
-        ) {
-          return {
-            id: "admin",
-            name: "Admin",
-            email: ADMIN_EMAIL,
-            role: "admin",
-          };
-        }
-
-        // Otherwise check database for customer
         await dbConnect();
 
-        const user = await User.findOne({ email: credentials.email });
+        // Search database for user (both customer and admin are stored in MongoDB)
+        const user = await User.findOne({
+          email: credentials.email.toLowerCase(),
+        });
 
         if (!user) {
           throw new Error("User not found");

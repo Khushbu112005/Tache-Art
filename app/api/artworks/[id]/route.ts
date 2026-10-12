@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { ArtworkService } from "@/services/artwork.service";
@@ -70,4 +70,8 @@ export async function DELETE(
   } catch (error) {
     return handleApiError(error);
   }
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 200 });
 }
