@@ -16,6 +16,7 @@ if (!MONGODB_URI) {
   } catch (e) {
     // Ignore if .env missing
   }
+  
 }
 
 if (!MONGODB_URI) {

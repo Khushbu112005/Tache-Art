@@ -11,8 +11,14 @@ export const metadata: Metadata = {
 export const revalidate = 60; // Revalidate every 60 seconds
 
 export default async function Home() {
-  // Fetch featured artworks via service layer
-  const artworks = await ArtworkService.getFeatured(3);
+  // Fetch featured artworks via service layer safely
+  let artworks: any[] = [];
+  try {
+    artworks = await ArtworkService.getFeatured(3);
+  } catch (error) {
+    console.warn("Could not fetch featured artworks at build time, will revalidate at runtime:", error);
+    artworks = [];
+  }
 
   // Serialize for client component
   const serializedArtworks = artworks.map((art: Record<string, unknown>) => ({

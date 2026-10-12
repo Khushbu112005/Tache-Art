@@ -1,12 +1,14 @@
 import mongoose from "mongoose";
+import dns from "dns";
 
-const MONGODB_URI = process.env.MONGODB_URI!;
-
-if (!MONGODB_URI) {
-  throw new Error(
-    "Please define the MONGODB_URI environment variable inside .env"
-  );
+// Ensure reliable DNS resolution for mongodb+srv:// on local ISP networks
+try {
+  dns.setServers(["8.8.8.8", "8.8.4.4"]);
+} catch {
+  // Ignore in non-Node environments
 }
+
+const MONGODB_URI = process.env.MONGODB_URI;
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -28,13 +30,20 @@ if (!globalWithMongoose.mongoose) {
 }
 
 async function dbConnect(): Promise<typeof mongoose> {
+  const uri = process.env.MONGODB_URI || MONGODB_URI;
+  if (!uri) {
+    throw new Error(
+      "Please define the MONGODB_URI environment variable in your Vercel project settings or .env"
+    );
+  }
+
   if (cached.conn) {
     return cached.conn;
   }
 
   if (!cached.promise) {
     cached.promise = mongoose
-      .connect(MONGODB_URI, {
+      .connect(uri, {
         bufferCommands: false,
       })
       .then((mongooseInstance) => mongooseInstance);
