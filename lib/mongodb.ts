@@ -3,7 +3,7 @@ import dns from "dns";
 
 // Ensure reliable DNS resolution for mongodb+srv:// on local ISP networks
 try {
-  dns.setServers(["8.8.8.8", "8.8.4.4"]);
+  dns.setServers(["8.8.8.8", "1.1.1.1", "8.8.4.4"]);
 } catch {
   // Ignore in non-Node environments
 }
@@ -37,8 +37,15 @@ async function dbConnect(): Promise<typeof mongoose> {
     );
   }
 
-  if (cached.conn) {
+  if (cached.conn && mongoose.connection.readyState === 1) {
     return cached.conn;
+  }
+
+  // Ensure DNS is primed right before connecting
+  try {
+    dns.setServers(["8.8.8.8", "1.1.1.1", "8.8.4.4"]);
+  } catch {
+    // Ignore in environments without raw socket access
   }
 
   if (!cached.promise) {
@@ -49,7 +56,13 @@ async function dbConnect(): Promise<typeof mongoose> {
       .then((mongooseInstance) => mongooseInstance);
   }
 
-  cached.conn = await cached.promise;
+  try {
+    cached.conn = await cached.promise;
+  } catch (error) {
+    cached.promise = null;
+    throw error;
+  }
+
   return cached.conn;
 }
 
