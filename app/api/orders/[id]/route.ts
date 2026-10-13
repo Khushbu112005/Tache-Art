@@ -114,6 +114,13 @@ export async function DELETE(
       return errorResponse("Forbidden", 403);
     }
 
+    // Admin permanently deletes the order
+    if (session.user.role === "admin") {
+      const result = await OrderService.deleteOrder(id);
+      return successResponse(result);
+    }
+
+    // Regular customer cancels the order
     const cancelledOrder = await OrderService.cancelOrder(
       id,
       session.user.name || "Customer",

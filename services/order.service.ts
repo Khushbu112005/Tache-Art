@@ -110,6 +110,33 @@ export class OrderService {
     return order;
   }
 
+  /**
+   * Permanently delete an order and associated payments / custom messages
+   */
+  static async deleteOrder(id: string) {
+    await dbConnect();
+    const order = await Order.findById(id);
+    if (!order) throw new NotFoundError("Order");
+
+    if (order.paymentId) {
+      await Payment.findByIdAndDelete(order.paymentId);
+    }
+
+    if (order.artworkId) {
+      await Artwork.findByIdAndUpdate(order.artworkId, { isSold: false });
+    }
+
+    try {
+      const Message = (await import("@/models/Message")).default;
+      await Message.deleteMany({ orderId: id });
+    } catch (msgErr) {
+      console.error("Failed to delete linked message:", msgErr);
+    }
+
+    await Order.findByIdAndDelete(id);
+    return { success: true, id };
+  }
+
 
   static async getStats() {
     await dbConnect();

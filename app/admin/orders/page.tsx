@@ -17,6 +17,7 @@ import {
   Mail,
   MapPin,
   X,
+  Trash2,
 } from "lucide-react";
 
 interface Order {
@@ -196,6 +197,29 @@ export default function AdminOrders() {
     } catch (error) {
       console.error("Error rejecting payment:", error);
       alert("Error rejecting payment.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDeleteOrder = async (orderId: string, orderName: string) => {
+    if (!window.confirm(`Are you sure you want to permanently delete Order #${orderId.slice(-6)} from ${orderName}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setActionLoading(orderId);
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setOrders((prev) => prev.filter((o) => o._id !== orderId));
+      } else {
+        alert("Failed to delete order.");
+      }
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      alert("Error deleting order.");
     } finally {
       setActionLoading(null);
     }
@@ -619,6 +643,19 @@ export default function AdminOrders() {
                               )}
                             </div>
                           )}
+
+                          <div className="pt-1 flex items-center justify-end">
+                            <button
+                              type="button"
+                              disabled={actionLoading === order._id}
+                              onClick={() => handleDeleteOrder(order._id, order.name)}
+                              className="inline-flex items-center space-x-1 text-[11px] text-gray-400 hover:text-red-600 transition-colors py-1"
+                              title="Permanently Delete Order"
+                            >
+                              <Trash2 size={13} />
+                              <span>Delete Order</span>
+                            </button>
+                          </div>
                         </div>
                       </td>
                     </tr>

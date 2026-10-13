@@ -12,9 +12,9 @@ export const revalidate = 60; // Revalidate every 60 seconds
 
 export default async function Home() {
   // Fetch featured artworks via service layer safely
-  let artworks: any[] = [];
+  let artworks: Record<string, unknown>[] = [];
   try {
-    artworks = await ArtworkService.getFeatured(3);
+    artworks = (await ArtworkService.getFeatured(3)) as unknown as Record<string, unknown>[];
   } catch (error) {
     console.warn("Could not fetch featured artworks at build time, will revalidate at runtime:", error);
     artworks = [];

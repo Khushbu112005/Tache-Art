@@ -8,7 +8,6 @@ import {
   ExternalLink,
   MessageSquare,
   Palette,
-  Check,
   Trash2,
   Search,
   RefreshCw,
