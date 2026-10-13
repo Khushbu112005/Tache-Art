@@ -73,12 +73,9 @@ export async function POST(req: NextRequest) {
     // --- Added Integrations for Email and FormSubmit ---
     const orderId = order._id.toString();
 
-    // 1. SMTP Email notifications (Gmail via Nodemailer)
+    // 1. Dispatch notification to studio admin (aasthajainokok@gmail.com) via Gmail SMTP
     try {
       if (EmailService.isConfigured()) {
-        // Send confirmation to the customer
-        await EmailService.sendOrderConfirmation(email, name, orderId, artworkType);
-        // Send notification to the admin
         await EmailService.sendAdminOrderNotification(
           name,
           email,
@@ -86,14 +83,26 @@ export async function POST(req: NextRequest) {
           artworkType,
           size,
           message,
-          referenceImage as string | undefined
+          referenceImage as string | undefined,
+          data.phone as string | undefined,
+          data.shippingAddress as string | undefined
         );
-        console.log(`[Order] Nodemailer notifications sent successfully for order: ${orderId}`);
+        console.log(`[Order] SMTP notification sent successfully to admin for order: ${orderId}`);
       } else {
-        console.log(`[Order] Nodemailer not configured. Skipping.`);
+        console.warn(`[Order] EmailService not configured. Skipping admin notification.`);
       }
-    } catch (emailError) {
-      console.error("[Order] Failed to send Nodemailer emails:", emailError);
+    } catch (adminEmailError) {
+      console.error("[Order] Failed to send admin notification email:", adminEmailError);
+    }
+
+    // 2. Dispatch customer confirmation email (best effort)
+    try {
+      if (EmailService.isConfigured() && email) {
+        await EmailService.sendOrderConfirmation(email, name, orderId, artworkType);
+        console.log(`[Order] Confirmation email sent successfully to customer: ${email}`);
+      }
+    } catch (customerEmailError) {
+      console.error("[Order] Failed to send customer confirmation email:", customerEmailError);
     }
 
     // 2. FormSubmit.co integration fallback

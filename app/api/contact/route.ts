@@ -119,16 +119,26 @@ export async function POST(req: NextRequest) {
     await newMessage.save();
     console.log(`[Contact] New message saved to database from: ${name} (${email})`);
 
-    // Also attempt to send email via Nodemailer
+    // 1. Dispatch email to studio admin (aasthajainokok@gmail.com) via Gmail SMTP
     try {
       if (EmailService.isConfigured()) {
         await EmailService.sendContactEmail(name, email, message);
-        console.log(`[Contact] Nodemailer notification sent successfully for ${name}`);
+        console.log(`[Contact] SMTP notification sent successfully to admin for message from: ${name}`);
       } else {
-        console.log(`[Contact] Nodemailer not configured. Skipping.`);
+        console.warn(`[Contact] EmailService is not configured. Missing EMAIL_SERVER_USER/EMAIL_SERVER_PASSWORD.`);
       }
     } catch (emailError) {
-      console.error("[Contact] Failed to send Nodemailer email:", emailError);
+      console.error("[Contact] Failed to send Nodemailer email to admin:", emailError);
+    }
+
+    // 2. Dispatch customer acknowledgement email
+    try {
+      if (EmailService.isConfigured() && email) {
+        await EmailService.sendContactConfirmation(email, name);
+        console.log(`[Contact] Customer confirmation sent to: ${email}`);
+      }
+    } catch (custAckErr) {
+      console.error("[Contact] Failed to send customer acknowledgement email:", custAckErr);
     }
 
     // Also attempt to send email via FormSubmit (as requested by user as a fallback)

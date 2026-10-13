@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed:admin": "node scripts/createAdmin.js",
-    "clean:data": "node scripts/clearOrdersAndMessages.js"
+    "clean:data": "node scripts/clearOrdersAndMessages.js",
+    "test:email": "node scripts/testEmail.js"
   },
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
