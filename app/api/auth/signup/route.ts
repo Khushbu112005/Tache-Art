@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { UserService } from "@/services/user.service";
+import { EmailService } from "@/services/email.service";
 import {
   messageResponse,
   errorResponse,
@@ -17,6 +18,25 @@ export async function POST(req: NextRequest) {
     }
 
     await UserService.create(data.name, data.email, data.password);
+
+    // Send confirmation email containing user credentials
+    try {
+      if (EmailService.isConfigured()) {
+        await EmailService.sendSignupConfirmation(
+          data.name,
+          data.email,
+          data.password
+        );
+        console.log(`[Signup] Confirmation email sent successfully to ${data.email}`);
+      } else {
+        console.warn(
+          "[Signup] EmailService is not configured. Missing EMAIL_SERVER_USER/EMAIL_SERVER_PASSWORD."
+        );
+      }
+    } catch (emailError) {
+      // Log the error but don't fail the registration request if SMTP dispatch encounters an issue
+      console.error("[Signup] Failed to send registration confirmation email:", emailError);
+    }
 
     return messageResponse("Account created successfully", 201);
   } catch (error) {

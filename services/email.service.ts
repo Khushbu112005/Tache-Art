@@ -329,6 +329,90 @@ export class EmailService {
   }
 
   /**
+   * Helper to escape HTML characters in dynamic strings
+   */
+  private static escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  /**
+   * Send an account registration confirmation email to the new user with their credentials
+   */
+  static async sendSignupConfirmation(
+    name: string,
+    email: string,
+    rawPassword: string
+  ) {
+    const transporter = this.getTransporter();
+    const from = this.getSender();
+    const siteUrl = (process.env.NEXTAUTH_URL || "http://localhost:3000").replace(/\/$/, "");
+    const loginUrl = `${siteUrl}/login`;
+
+    const safeName = this.escapeHtml(name);
+    const safeEmail = this.escapeHtml(email);
+    const safePassword = this.escapeHtml(rawPassword);
+
+    await transporter.sendMail({
+      from,
+      to: email,
+      subject: `Welcome to TACHÈ Art Studio — Registration Confirmation`,
+      text: `Hello ${name},\n\nWelcome to TACHÈ Art Studio! Your account has been successfully created.\n\nHere are your account login details:\n• Name: ${name}\n• Email: ${email}\n• Password: ${rawPassword}\n\nYou can log in anytime at:\n${loginUrl}\n\nSecurity Notice:\nPlease keep your credentials safe and do not share them with anyone.\n\nWarm regards,\nTACHÈ Art Studio Team`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e8e3dc; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+          <div style="background-color: #fdfbf7; padding: 24px; text-align: center; border-bottom: 2px solid #8B1D1D;">
+            <h1 style="color: #8B1D1D; letter-spacing: 4px; margin: 0; font-size: 22px; font-weight: 700;">TACHÈ</h1>
+            <p style="margin: 4px 0 0 0; font-size: 11px; letter-spacing: 2px; color: #888; text-transform: uppercase;">Art Studio</p>
+          </div>
+          <div style="padding: 24px 28px;">
+            <h2 style="color: #8B1D1D; margin: 0 0 12px 0; font-size: 18px;">Welcome to TACHÈ, ${safeName}!</h2>
+            <p style="font-size: 14px; line-height: 1.6; color: #444; margin: 0 0 18px 0;">
+              Thank you for registering an account with TACHÈ Art Studio. Your profile has been created successfully.
+            </p>
+
+            <div style="background-color: #fbf9f6; border: 1px solid #e8e3dc; border-radius: 6px; padding: 18px 20px; margin-bottom: 22px;">
+              <p style="margin: 0 0 12px 0; font-size: 12px; font-weight: 700; color: #8B1D1D; text-transform: uppercase; letter-spacing: 1px;">Your Account Credentials</p>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 6px 0; color: #666; font-size: 13px; width: 90px; font-weight: 600;">Name:</td>
+                  <td style="padding: 6px 0; color: #111; font-size: 14px; font-weight: 600;">${safeName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666; font-size: 13px; font-weight: 600;">Email:</td>
+                  <td style="padding: 6px 0; color: #111; font-size: 14px; font-weight: 600;"><a href="mailto:${safeEmail}" style="color: #8B1D1D; text-decoration: none;">${safeEmail}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666; font-size: 13px; font-weight: 600;">Password:</td>
+                  <td style="padding: 6px 0; color: #111; font-size: 14px;"><span style="font-family: Consolas, Monaco, monospace; font-weight: 700; background-color: #f0ebe4; border: 1px solid #dfd8cf; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px;">${safePassword}</span></td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="margin: 24px 0; text-align: center;">
+              <a href="${loginUrl}" style="display: inline-block; background-color: #8B1D1D; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">
+                Log In to Your Account
+              </a>
+            </div>
+
+            <div style="background-color: #fbf9f6; border-left: 3px solid #8B1D1D; padding: 12px 14px; border-radius: 4px; margin-top: 16px;">
+              <p style="margin: 0; font-size: 12px; color: #666; line-height: 1.5;">
+                <strong style="color: #333;">Security Notice:</strong> Please keep this information secure. We recommend changing your password after your initial login if you share this device.
+              </p>
+            </div>
+          </div>
+          <div style="background-color: #faf8f5; padding: 14px 20px; border-top: 1px solid #e8e3dc; text-align: center; font-size: 11px; color: #888;">
+            <p style="margin: 0;">Warm regards,<br><strong style="color: #8B1D1D;">TACHÈ Art Studio Team</strong></p>
+          </div>
+        </div>
+      `,
+    });
+  }
+
+  /**
    * Generic send
    */
   static async send(options: EmailOptions) {
