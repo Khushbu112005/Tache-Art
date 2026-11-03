@@ -120,6 +120,47 @@ async function run() {
     });
     console.log('✅ Registration Confirmation Email sent successfully! ID:', regInfo.messageId);
 
+    // 5. Test Payment Approved / Delivery Soon Email
+    console.log('Sending Test Payment Approved Email to:', adminEmail);
+    const approvedInfo = await transporter.sendMail({
+      from: `"TACHÈ Art Studio" <${user}>`,
+      to: adminEmail,
+      subject: 'Payment Approved & Order Confirmed: #TST001 — TACHÈ Art Studio',
+      text: 'Hello Test Collector,\n\nGreat news! Your payment of ₹15,000 has been verified and approved by our studio.\n\nYour order #TST001 is now confirmed and will be carefully packaged and delivered soon!',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee;">
+          <h2 style="color: #047857;">Payment Verified & Approved</h2>
+          <p>Your order will be delivered soon!</p>
+          <hr style="border: 1px solid #f0f0f0;" />
+          <p><strong>Order ID:</strong> #TST001</p>
+          <p><strong>Artwork:</strong> Serenity Textured Canvas</p>
+          <p><strong>Amount:</strong> ₹15,000</p>
+          <p><strong>Status:</strong> Confirmed & In Progress (Preparing for Dispatch)</p>
+        </div>
+      `
+    });
+    console.log('✅ Payment Approved Email sent successfully! ID:', approvedInfo.messageId);
+
+    // 6. Test Admin New Order Notification
+    console.log('Sending Test Admin New Order Notification to:', adminEmail);
+    const newOrderInfo = await transporter.sendMail({
+      from: `"TACHÈ Art Studio" <${user}>`,
+      to: adminEmail,
+      subject: '🚨 New Order #TST001: ₹15,000 from Test Collector — TACHÈ',
+      text: 'New Artwork Order Received!\n\nOrder ID: #TST001\nCustomer: Test Collector\nAmount: ₹15,000\nArtwork: Serenity Textured Canvas',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee;">
+          <h2 style="color: #8B1D1D;">New Artwork Order & Payment Received</h2>
+          <hr style="border: 1px solid #f0f0f0;" />
+          <p><strong>Order ID:</strong> #TST001</p>
+          <p><strong>Customer:</strong> Test Collector</p>
+          <p><strong>Artwork:</strong> Serenity Textured Canvas</p>
+          <p><strong>Amount:</strong> ₹15,000</p>
+        </div>
+      `
+    });
+    console.log('✅ Admin New Order Notification sent successfully! ID:', newOrderInfo.messageId);
+
   } catch (err) {
     console.error('❌ SMTP test error:', err);
   }

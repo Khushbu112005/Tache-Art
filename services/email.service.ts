@@ -290,9 +290,9 @@ export class EmailService {
 
     let statusMessage = "";
     if (newStatus === "in-progress") {
-      statusMessage = "Good news! We have started working on your custom request.";
+      statusMessage = "Good news! Your order is confirmed and in progress. Our studio team is preparing your artwork and it will be delivered to your address soon!";
     } else if (newStatus === "completed") {
-      statusMessage = "Your custom artwork is completed and ready!";
+      statusMessage = "Your artwork is completed / dispatched and is on its way to you!";
     } else if (newStatus === "cancelled") {
       statusMessage = "Your order request has been cancelled.";
     } else {
@@ -316,12 +316,297 @@ export class EmailService {
             <div style="background-color: #fbf9f6; border: 1px solid #e8e3dc; border-radius: 6px; padding: 14px 18px; margin: 16px 0;">
               <p style="margin: 4px 0; font-size: 13px;"><strong>Order ID:</strong> #${orderId.slice(-6).toUpperCase()}</p>
               <p style="margin: 4px 0; font-size: 13px;"><strong>Type:</strong> ${artworkType}</p>
-              <p style="margin: 4px 0; font-size: 13px;"><strong>New Status:</strong> ${newStatus.toUpperCase()}</p>
+              <p style="margin: 4px 0; font-size: 13px;"><strong>Status:</strong> ${newStatus.toUpperCase()}</p>
             </div>
             <p style="color: #666; font-size: 13px; line-height: 1.6; margin: 0;">You can view the full details on your Buyer Registry page.</p>
           </div>
           <div style="background-color: #faf8f5; padding: 14px 20px; border-top: 1px solid #e8e3dc; text-align: center; font-size: 11px; color: #888;">
             <p style="margin: 0;">Warm regards,<br><strong style="color: #8B1D1D;">TACHÈ Art Studio</strong></p>
+          </div>
+        </div>
+      `,
+    });
+  }
+
+  /**
+   * Send an email to the customer when admin approves their payment
+   */
+  static async sendPaymentApprovedEmail(options: {
+    to: string;
+    customerName: string;
+    orderId: string;
+    artworkTitle: string;
+    amount: number;
+    utrNumber?: string;
+    shippingAddress?: string;
+  }) {
+    const { to, customerName, orderId, artworkTitle, amount, utrNumber, shippingAddress } = options;
+    const transporter = this.getTransporter();
+    const from = this.getSender();
+    const orderRef = orderId.slice(-6).toUpperCase();
+    const safeName = this.escapeHtml(customerName || "Collector");
+    const safeTitle = this.escapeHtml(artworkTitle || "Artwork Acquisition");
+    const safeAddress = this.escapeHtml(shippingAddress || "As provided during checkout");
+    const safeUtr = this.escapeHtml(utrNumber || "Verified");
+
+    let siteUrl = (
+      process.env.APP_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.NEXTAUTH_URL ||
+      "https://tacheart.vercel.app"
+    ).trim().replace(/\/$/, "");
+
+    if (siteUrl.includes("localhost") || siteUrl.includes("127.0.0.1")) {
+      siteUrl = "https://tacheart.vercel.app";
+    }
+
+    const ordersUrl = `${siteUrl}/user/orders`;
+
+    await transporter.sendMail({
+      from,
+      to,
+      subject: `Payment Approved & Order Confirmed: #${orderRef} — TACHÈ Art Studio`,
+      text: `Hello ${customerName},\n\nGreat news! Your payment of ₹${amount.toLocaleString("en-IN")} has been verified and approved by our studio.\n\nYour order #${orderRef} is now confirmed and will be carefully packaged and delivered soon!\n\nOrder Details:\n• Order ID: #${orderRef}\n• Artwork: ${artworkTitle}\n• Amount: ₹${amount.toLocaleString("en-IN")}\n• UTR / Reference: ${utrNumber || "Verified"}\n• Shipping To: ${shippingAddress || "As provided"}\n• Status: Confirmed & Preparing for Delivery\n\nYou can track your order status anytime at:\n${ordersUrl}\n\nWarm regards,\nTACHÈ Art Studio Team`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e8e3dc; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+          <div style="background-color: #fdfbf7; padding: 24px; text-align: center; border-bottom: 2px solid #8B1D1D;">
+            <h1 style="color: #8B1D1D; letter-spacing: 4px; margin: 0; font-size: 22px; font-weight: 700;">TACHÈ</h1>
+            <p style="margin: 4px 0 0 0; font-size: 11px; letter-spacing: 2px; color: #888; text-transform: uppercase;">Art Studio</p>
+          </div>
+          <div style="padding: 26px 28px;">
+            <div style="display: inline-block; background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 9999px; padding: 4px 14px; margin-bottom: 14px;">
+              <span style="font-size: 11px; font-weight: 700; color: #047857; text-transform: uppercase; letter-spacing: 1px;">✓ Payment Verified & Approved</span>
+            </div>
+            <h2 style="color: #1a161a; margin: 0 0 10px 0; font-size: 20px;">Your Order Will Be Delivered Soon!</h2>
+            <p style="font-size: 14px; line-height: 1.6; color: #444; margin: 0 0 18px 0;">
+              Hello <strong>${safeName}</strong>, thank you for your acquisition. We have verified your payment of <strong style="color: #8B1D1D;">₹${amount.toLocaleString("en-IN")}</strong>. Your order is now officially confirmed and will be delivered soon.
+            </p>
+
+            <div style="background-color: #fbf9f6; border: 1px solid #e8e3dc; border-radius: 8px; padding: 18px 20px; margin-bottom: 22px;">
+              <p style="margin: 0 0 12px 0; font-size: 11px; font-weight: 700; color: #8B1D1D; text-transform: uppercase; letter-spacing: 1.5px;">Order & Delivery Details</p>
+              <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                <tr>
+                  <td style="padding: 6px 0; color: #666; font-weight: 600; width: 120px;">Order Reference:</td>
+                  <td style="padding: 6px 0; color: #111; font-weight: 700;">#${orderRef}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666; font-weight: 600;">Artwork:</td>
+                  <td style="padding: 6px 0; color: #111; font-weight: 600;">${safeTitle}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666; font-weight: 600;">Amount Paid:</td>
+                  <td style="padding: 6px 0; color: #047857; font-weight: 700; font-size: 14px;">₹${amount.toLocaleString("en-IN")}</td>
+                </tr>
+                ${utrNumber ? `
+                <tr>
+                  <td style="padding: 6px 0; color: #666; font-weight: 600;">UTR Number:</td>
+                  <td style="padding: 6px 0; color: #444; font-family: monospace;">${safeUtr}</td>
+                </tr>` : ""}
+                <tr>
+                  <td style="padding: 6px 0; color: #666; font-weight: 600;">Shipping To:</td>
+                  <td style="padding: 6px 0; color: #111;">${safeAddress}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666; font-weight: 600;">Status:</td>
+                  <td style="padding: 6px 0; color: #8B1D1D; font-weight: 700;">Confirmed & Preparing for Dispatch</td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="background-color: #f7fafc; border: 1px solid #edf2f7; border-left: 3px solid #8B1D1D; padding: 14px 16px; border-radius: 4px; margin-bottom: 22px;">
+              <p style="margin: 0; font-size: 13px; color: #4a5568; line-height: 1.6;">
+                <strong>📦 Packaging & Delivery:</strong> Your artwork is now being prepared with museum-grade protective packaging to ensure it reaches you in flawless condition. Our courier will deliver your package soon.
+              </p>
+            </div>
+
+            <div style="margin: 24px 0; text-align: center;">
+              <a href="${ordersUrl}" style="display: inline-block; background-color: #8B1D1D; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">
+                View in Collector Registry
+              </a>
+            </div>
+          </div>
+          <div style="background-color: #faf8f5; padding: 14px 20px; border-top: 1px solid #e8e3dc; text-align: center; font-size: 11px; color: #888;">
+            <p style="margin: 0;">Warm regards,<br><strong style="color: #8B1D1D;">TACHÈ Art Studio Team</strong></p>
+          </div>
+        </div>
+      `,
+    });
+  }
+
+  /**
+   * Send an email to the customer when admin rejects their payment
+   */
+  static async sendPaymentRejectedEmail(
+    to: string,
+    customerName: string,
+    orderId: string,
+    artworkTitle: string,
+    reason?: string
+  ) {
+    const transporter = this.getTransporter();
+    const from = this.getSender();
+    const orderRef = orderId.slice(-6).toUpperCase();
+    const safeName = this.escapeHtml(customerName || "Customer");
+    const safeTitle = this.escapeHtml(artworkTitle || "Artwork");
+    const safeReason = this.escapeHtml(reason || "Payment could not be verified in our bank account");
+
+    await transporter.sendMail({
+      from,
+      to,
+      subject: `Payment Verification Update: #${orderRef} — TACHÈ Art Studio`,
+      text: `Hello ${customerName},\n\nWe were unable to verify your payment for order #${orderRef} (${artworkTitle}).\nReason: ${reason || "Payment not verified"}\n\nIf you believe this is an error or have an updated transaction reference, please reply directly to this email.\n\nWarm regards,\nTACHÈ Art Studio Team`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e8e3dc; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+          <div style="background-color: #fdfbf7; padding: 24px; text-align: center; border-bottom: 2px solid #8B1D1D;">
+            <h1 style="color: #8B1D1D; letter-spacing: 4px; margin: 0; font-size: 22px; font-weight: 700;">TACHÈ</h1>
+            <p style="margin: 4px 0 0 0; font-size: 11px; letter-spacing: 2px; color: #888; text-transform: uppercase;">Art Studio</p>
+          </div>
+          <div style="padding: 24px 28px;">
+            <h2 style="color: #b91c1c; margin: 0 0 12px 0; font-size: 18px;">Payment Verification Update</h2>
+            <p style="font-size: 14px; line-height: 1.6; color: #444;">Hello ${safeName},</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #444;">
+              We reviewed your payment submission for order <strong>#${orderRef}</strong> (${safeTitle}), but were unable to verify the transaction in our records.
+            </p>
+            <div style="background-color: #fef2f2; border-left: 3px solid #dc2626; padding: 12px 14px; border-radius: 4px; margin: 16px 0;">
+              <p style="margin: 0; font-size: 13px; color: #991b1b;">
+                <strong>Reason:</strong> ${safeReason}
+              </p>
+            </div>
+            <p style="font-size: 13px; color: #666; line-height: 1.6; margin: 0;">
+              If you have any questions, updated UTR details, or bank receipts, please reply directly to this email and our team will gladly assist you.
+            </p>
+          </div>
+          <div style="background-color: #faf8f5; padding: 14px 20px; border-top: 1px solid #e8e3dc; text-align: center; font-size: 11px; color: #888;">
+            <p style="margin: 0;">Warm regards,<br><strong style="color: #8B1D1D;">TACHÈ Art Studio Team</strong></p>
+          </div>
+        </div>
+      `,
+    });
+  }
+
+  /**
+   * Send notification to admin whenever a new artwork order (UPI / cart checkout) is placed
+   */
+  static async sendAdminNewArtworkOrderNotification(options: {
+    orderId: string;
+    customerName: string;
+    customerEmail: string;
+    customerPhone?: string;
+    shippingAddress?: string;
+    artworkTitle: string;
+    amount: number;
+    utrNumber: string;
+    screenshotUrl?: string;
+    senderUpi?: string;
+    notes?: string;
+  }) {
+    const {
+      orderId,
+      customerName,
+      customerEmail,
+      customerPhone,
+      shippingAddress,
+      artworkTitle,
+      amount,
+      utrNumber,
+      screenshotUrl,
+      senderUpi,
+      notes,
+    } = options;
+    const transporter = this.getTransporter();
+    const adminTo = this.getAdminRecipient();
+    const from = this.getSender();
+    const orderRef = orderId.slice(-6).toUpperCase();
+
+    let siteUrl = (
+      process.env.APP_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.NEXTAUTH_URL ||
+      "https://tacheart.vercel.app"
+    ).trim().replace(/\/$/, "");
+
+    if (siteUrl.includes("localhost") || siteUrl.includes("127.0.0.1")) {
+      siteUrl = "https://tacheart.vercel.app";
+    }
+
+    const adminPaymentsUrl = `${siteUrl}/admin/payments`;
+
+    await transporter.sendMail({
+      from,
+      to: adminTo,
+      replyTo: customerEmail,
+      subject: `🚨 New Order #${orderRef}: ₹${amount.toLocaleString("en-IN")} from ${customerName} — TACHÈ`,
+      text: `New Artwork Order Received!\n\nOrder ID: #${orderRef}\nCustomer: ${customerName}\nEmail: ${customerEmail}\nPhone: ${customerPhone || "N/A"}\nArtwork: ${artworkTitle}\nAmount: ₹${amount.toLocaleString("en-IN")}\nUTR: ${utrNumber}\nShipping Address: ${shippingAddress || "N/A"}\nScreenshot: ${screenshotUrl || "N/A"}\n\nReview & Verify at: ${adminPaymentsUrl}`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e8e3dc; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+          <div style="background-color: #fdfbf7; padding: 24px; text-align: center; border-bottom: 2px solid #8B1D1D;">
+            <h1 style="color: #8B1D1D; letter-spacing: 4px; margin: 0; font-size: 22px; font-weight: 700;">TACHÈ</h1>
+            <p style="margin: 4px 0 0 0; font-size: 11px; letter-spacing: 2px; color: #888; text-transform: uppercase;">New Order & Payment Received</p>
+          </div>
+          <div style="padding: 24px 28px;">
+            <div style="background-color: #fbf3f3; border: 1px solid #f2dede; padding: 10px 14px; border-radius: 6px; margin-bottom: 18px; text-align: center;">
+              <span style="font-size: 12px; color: #8B1D1D; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Order Ref: #${orderRef} • ₹${amount.toLocaleString("en-IN")}</span>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 13px;">
+              <tr>
+                <td style="padding: 6px 0; color: #666; font-weight: 600; width: 120px;">Customer:</td>
+                <td style="padding: 6px 0; color: #111; font-weight: 700;">${this.escapeHtml(customerName)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; color: #666; font-weight: 600;">Email:</td>
+                <td style="padding: 6px 0; color: #111;"><a href="mailto:${customerEmail}" style="color: #8B1D1D;">${customerEmail}</a></td>
+              </tr>
+              ${customerPhone ? `
+              <tr>
+                <td style="padding: 6px 0; color: #666; font-weight: 600;">Phone:</td>
+                <td style="padding: 6px 0; color: #111; font-weight: 600;">${this.escapeHtml(customerPhone)}</td>
+              </tr>` : ""}
+              <tr>
+                <td style="padding: 6px 0; color: #666; font-weight: 600;">Artwork:</td>
+                <td style="padding: 6px 0; color: #111; font-weight: 700;">${this.escapeHtml(artworkTitle)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; color: #666; font-weight: 600;">Amount:</td>
+                <td style="padding: 6px 0; color: #047857; font-weight: 700; font-size: 15px;">₹${amount.toLocaleString("en-IN")}</td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; color: #666; font-weight: 600;">UTR Number:</td>
+                <td style="padding: 6px 0; color: #111; font-family: monospace; font-weight: 700;">${this.escapeHtml(utrNumber)}</td>
+              </tr>
+              ${senderUpi ? `
+              <tr>
+                <td style="padding: 6px 0; color: #666; font-weight: 600;">Sender UPI:</td>
+                <td style="padding: 6px 0; color: #111;">${this.escapeHtml(senderUpi)}</td>
+              </tr>` : ""}
+              ${shippingAddress ? `
+              <tr>
+                <td style="padding: 6px 0; color: #666; font-weight: 600;">Shipping Address:</td>
+                <td style="padding: 6px 0; color: #111;">${this.escapeHtml(shippingAddress)}</td>
+              </tr>` : ""}
+              ${notes ? `
+              <tr>
+                <td style="padding: 6px 0; color: #666; font-weight: 600;">Customer Notes:</td>
+                <td style="padding: 6px 0; color: #111;">${this.escapeHtml(notes)}</td>
+              </tr>` : ""}
+            </table>
+
+            ${screenshotUrl ? `
+            <div style="margin-top: 15px; padding: 14px; background: #fdfbf7; border: 1px solid #eae5de; border-radius: 6px;">
+              <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700; color: #8B1D1D; text-transform: uppercase; letter-spacing: 1px;">Attached Payment Screenshot:</p>
+              <a href="${screenshotUrl}" target="_blank" style="display: inline-block; color: #8B1D1D; text-decoration: underline; font-size: 12px; font-weight: 600; margin-bottom: 8px;">View Full Screenshot</a>
+              <div><img src="${screenshotUrl}" alt="Payment Receipt" style="max-width: 100%; max-height: 320px; border-radius: 6px; object-fit: contain; display: block;" /></div>
+            </div>
+            ` : ""}
+
+            <div style="margin-top: 24px; text-align: center;">
+              <a href="${adminPaymentsUrl}" style="display: inline-block; background-color: #8B1D1D; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">
+                Verify & Approve in Admin Dashboard
+              </a>
+            </div>
+          </div>
+          <div style="background-color: #faf8f5; padding: 14px 20px; border-top: 1px solid #e8e3dc; text-align: center; font-size: 11px; color: #888;">
+            <p style="margin: 0;">TACHÈ Art Studio &bull; Notification dispatched to ${adminTo}</p>
           </div>
         </div>
       `,

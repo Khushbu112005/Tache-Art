@@ -49,8 +49,22 @@ export class OrderService {
     const order = await Order.findByIdAndUpdate(id, data, { new: true });
     if (!order) throw new NotFoundError("Order");
 
-    // Send email notification if status was updated
-    if (data.status && typeof data.status === "string" && EmailService.isConfigured()) {
+    // Send email notification if payment was approved or status updated
+    if (data.paymentStatus === "paid" && EmailService.isConfigured() && order.email) {
+      try {
+        await EmailService.sendPaymentApprovedEmail({
+          to: order.email,
+          customerName: order.name,
+          orderId: order._id.toString(),
+          artworkTitle: order.artworkType,
+          amount: order.totalAmount || 0,
+          utrNumber: order.utrNumber || undefined,
+          shippingAddress: order.shippingAddress || undefined,
+        });
+      } catch (err) {
+        console.error("Failed to send payment approved email:", err);
+      }
+    } else if (data.status && typeof data.status === "string" && EmailService.isConfigured()) {
       try {
         await EmailService.sendStatusUpdateEmail(
           order.email,

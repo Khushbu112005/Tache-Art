@@ -7,6 +7,7 @@ import Artwork from "@/models/Artwork";
 import { NotFoundError, ValidationError } from "@/utils/apiResponse";
 import { DEFAULT_CURRENCY } from "@/utils/constants";
 import { IManualUpiPaymentInput } from "@/types/payment";
+import { EmailService } from "@/services/email.service";
 
 export class PaymentService {
   /**
@@ -92,6 +93,7 @@ export class PaymentService {
     }
 
     const now = new Date();
+    let linkedOrder: any = null;
 
     if (action === "approve") {
       payment.status = "paid";
@@ -102,17 +104,42 @@ export class PaymentService {
 
       // Update linked order if present
       if (payment.orderRef) {
-        await Order.findByIdAndUpdate(payment.orderRef, {
-          status: "in-progress",
-          paymentStatus: "paid",
-          verifiedAt: now,
-          verifiedBy: adminEmail,
-        });
+        linkedOrder = await Order.findByIdAndUpdate(
+          payment.orderRef,
+          {
+            status: "in-progress",
+            paymentStatus: "paid",
+            verifiedAt: now,
+            verifiedBy: adminEmail,
+          },
+          { new: true }
+        );
       }
 
       // Mark artwork as sold
       if (payment.artworkId) {
         await Artwork.findByIdAndUpdate(payment.artworkId, { isSold: true });
+      }
+
+      // Dispatch Payment Approved email to customer (Delivery Soon)
+      try {
+        const recipientEmail = payment.customerEmail || linkedOrder?.email;
+        if (EmailService.isConfigured() && recipientEmail) {
+          await EmailService.sendPaymentApprovedEmail({
+            to: recipientEmail,
+            customerName: payment.customerName || linkedOrder?.name || "Collector",
+            orderId: linkedOrder?._id?.toString() || payment.orderId,
+            artworkTitle: linkedOrder?.artworkType || "Artwork Acquisition",
+            amount: payment.amount,
+            utrNumber: payment.utrNumber || undefined,
+            shippingAddress: linkedOrder?.shippingAddress || undefined,
+          });
+          console.log(`[Payment] Approval & Delivery Soon email dispatched to ${recipientEmail}`);
+        } else {
+          console.warn("[Payment] EmailService not configured. Skipping payment approval email.");
+        }
+      } catch (emailErr) {
+        console.error("[Payment] Failed to send approval email to customer:", emailErr);
       }
     } else {
       payment.status = "rejected";
@@ -123,13 +150,39 @@ export class PaymentService {
 
       // Update linked order if present
       if (payment.orderRef) {
-        await Order.findByIdAndUpdate(payment.orderRef, {
-          status: "cancelled",
-          paymentStatus: "rejected",
-          rejectionReason: reason || "Payment verification rejected",
-          verifiedAt: now,
-          verifiedBy: adminEmail,
-        });
+        linkedOrder = await Order.findByIdAndUpdate(
+          payment.orderRef,
+          {
+            status: "cancelled",
+            paymentStatus: "rejected",
+            rejectionReason: reason || "Payment verification rejected",
+            verifiedAt: now,
+            verifiedBy: adminEmail,
+          },
+          { new: true }
+        );
+      }
+
+      // Mark artwork back as available
+      if (payment.artworkId) {
+        await Artwork.findByIdAndUpdate(payment.artworkId, { isSold: false });
+      }
+
+      // Dispatch rejection notification email to customer
+      try {
+        const recipientEmail = payment.customerEmail || linkedOrder?.email;
+        if (EmailService.isConfigured() && recipientEmail) {
+          await EmailService.sendPaymentRejectedEmail(
+            recipientEmail,
+            payment.customerName || linkedOrder?.name || "Customer",
+            linkedOrder?._id?.toString() || payment.orderId,
+            linkedOrder?.artworkType || "Artwork Acquisition",
+            reason
+          );
+          console.log(`[Payment] Rejection email dispatched to ${recipientEmail}`);
+        }
+      } catch (emailErr) {
+        console.error("[Payment] Failed to send rejection email to customer:", emailErr);
       }
     }
 
