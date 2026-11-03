@@ -350,7 +350,19 @@ export class EmailService {
   ) {
     const transporter = this.getTransporter();
     const from = this.getSender();
-    const siteUrl = (process.env.NEXTAUTH_URL || "http://localhost:3000").replace(/\/$/, "");
+
+    let siteUrl = (
+      process.env.APP_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.NEXTAUTH_URL ||
+      "https://tacheart.vercel.app"
+    ).trim().replace(/\/$/, "");
+
+    // Ensure links sent in user emails point to live production rather than localhost
+    if (siteUrl.includes("localhost") || siteUrl.includes("127.0.0.1")) {
+      siteUrl = "https://tacheart.vercel.app";
+    }
+
     const loginUrl = `${siteUrl}/login`;
 
     const safeName = this.escapeHtml(name);
@@ -401,6 +413,112 @@ export class EmailService {
             <div style="background-color: #fbf9f6; border-left: 3px solid #8B1D1D; padding: 12px 14px; border-radius: 4px; margin-top: 16px;">
               <p style="margin: 0; font-size: 12px; color: #666; line-height: 1.5;">
                 <strong style="color: #333;">Security Notice:</strong> Please keep this information secure. We recommend changing your password after your initial login if you share this device.
+              </p>
+            </div>
+          </div>
+          <div style="background-color: #faf8f5; padding: 14px 20px; border-top: 1px solid #e8e3dc; text-align: center; font-size: 11px; color: #888;">
+            <p style="margin: 0;">Warm regards,<br><strong style="color: #8B1D1D;">TACHÈ Art Studio Team</strong></p>
+          </div>
+        </div>
+      `,
+    });
+  }
+
+  /**
+   * Send a password reset email with a 6-digit code and direct reset link
+   */
+  static async sendPasswordResetEmail(
+    name: string,
+    email: string,
+    resetCode: string
+  ) {
+    const transporter = this.getTransporter();
+    const from = this.getSender();
+
+    let siteUrl = (
+      process.env.APP_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.NEXTAUTH_URL ||
+      "https://tacheart.vercel.app"
+    ).trim().replace(/\/$/, "");
+
+    if (siteUrl.includes("localhost") || siteUrl.includes("127.0.0.1")) {
+      siteUrl = "https://tacheart.vercel.app";
+    }
+
+    const resetLink = `${siteUrl}/login?mode=reset&email=${encodeURIComponent(email)}&code=${encodeURIComponent(resetCode)}`;
+    const safeName = this.escapeHtml(name);
+
+    await transporter.sendMail({
+      from,
+      to: email,
+      subject: `Password Reset Request — TACHÈ Art Studio`,
+      text: `Hello ${name},\n\nWe received a request to reset your password for your TACHÈ Art Studio account.\n\nYour 6-digit reset code is: ${resetCode}\n(This code is valid for 15 minutes)\n\nYou can also reset your password directly by visiting this link:\n${resetLink}\n\nIf you did not request a password reset, you can safely ignore this email. Your account remains secure.\n\nWarm regards,\nTACHÈ Art Studio Team`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e8e3dc; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+          <div style="background-color: #fdfbf7; padding: 24px; text-align: center; border-bottom: 2px solid #8B1D1D;">
+            <h1 style="color: #8B1D1D; letter-spacing: 4px; margin: 0; font-size: 22px; font-weight: 700;">TACHÈ</h1>
+            <p style="margin: 4px 0 0 0; font-size: 11px; letter-spacing: 2px; color: #888; text-transform: uppercase;">Art Studio</p>
+          </div>
+          <div style="padding: 24px 28px;">
+            <h2 style="color: #8B1D1D; margin: 0 0 12px 0; font-size: 18px;">Password Reset Request</h2>
+            <p style="font-size: 14px; line-height: 1.6; color: #444; margin: 0 0 16px 0;">
+              Hello ${safeName}, we received a request to reset your password. Use the verification code below or click the button to set a new password:
+            </p>
+
+            <div style="background-color: #fbf9f6; border: 1px solid #e8e3dc; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+              <span style="display: block; font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">Your Verification Code</span>
+              <span style="font-family: Consolas, Monaco, monospace; font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #8B1D1D; display: inline-block; background-color: #ffffff; padding: 8px 20px; border-radius: 6px; border: 1px dashed #8B1D1D;">${resetCode}</span>
+              <p style="margin: 10px 0 0 0; font-size: 11px; color: #888;">Valid for 15 minutes</p>
+            </div>
+
+            <div style="margin: 24px 0; text-align: center;">
+              <a href="${resetLink}" style="display: inline-block; background-color: #8B1D1D; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">
+                Reset Password Directly
+              </a>
+            </div>
+
+            <div style="background-color: #fcfcfc; border-left: 3px solid #8B1D1D; padding: 12px 14px; border-radius: 4px; margin-top: 20px;">
+              <p style="margin: 0; font-size: 12px; color: #666; line-height: 1.5;">
+                <strong>Security Notice:</strong> If you did not request this password reset, please ignore this email. Your password will remain unchanged.
+              </p>
+            </div>
+          </div>
+          <div style="background-color: #faf8f5; padding: 14px 20px; border-top: 1px solid #e8e3dc; text-align: center; font-size: 11px; color: #888;">
+            <p style="margin: 0;">Warm regards,<br><strong style="color: #8B1D1D;">TACHÈ Art Studio Team</strong></p>
+          </div>
+        </div>
+      `,
+    });
+  }
+
+  /**
+   * Send a password changed confirmation notification
+   */
+  static async sendPasswordChangedNotification(name: string, email: string) {
+    const transporter = this.getTransporter();
+    const from = this.getSender();
+    const safeName = this.escapeHtml(name);
+
+    await transporter.sendMail({
+      from,
+      to: email,
+      subject: `Your TACHÈ Password Has Been Changed`,
+      text: `Hello ${name},\n\nYour password for your TACHÈ Art Studio account was successfully changed.\n\nIf you did not make this change, please contact our support team immediately.\n\nWarm regards,\nTACHÈ Art Studio Team`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e8e3dc; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+          <div style="background-color: #fdfbf7; padding: 24px; text-align: center; border-bottom: 2px solid #8B1D1D;">
+            <h1 style="color: #8B1D1D; letter-spacing: 4px; margin: 0; font-size: 22px; font-weight: 700;">TACHÈ</h1>
+            <p style="margin: 4px 0 0 0; font-size: 11px; letter-spacing: 2px; color: #888; text-transform: uppercase;">Art Studio</p>
+          </div>
+          <div style="padding: 24px 28px;">
+            <h2 style="color: #8B1D1D; margin: 0 0 12px 0; font-size: 18px;">Password Updated Successfully</h2>
+            <p style="font-size: 14px; line-height: 1.6; color: #444; margin: 0 0 16px 0;">
+              Hello ${safeName}, this is a confirmation that your TACHÈ Art Studio account password was recently changed.
+            </p>
+            <div style="background-color: #fbf9f6; border-left: 3px solid #8B1D1D; padding: 12px 14px; border-radius: 4px; margin-top: 16px;">
+              <p style="margin: 0; font-size: 12px; color: #666; line-height: 1.5;">
+                <strong style="color: #333;">Security Notice:</strong> If you did not make this change, please reach out to us immediately to secure your account.
               </p>
             </div>
           </div>

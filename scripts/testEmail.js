@@ -77,7 +77,7 @@ async function run() {
       from: `"TACHÈ Art Studio" <${user}>`,
       to: adminEmail,
       subject: 'Welcome to TACHÈ Art Studio — Registration Confirmation',
-      text: 'Hello Test User,\n\nWelcome to TACHÈ Art Studio! Your account has been successfully created.\n\nHere are your account login details:\n• Email: test.customer@gmail.com\n• Password: SamplePassword123\n\nYou can log in anytime at:\nhttp://localhost:3000/login\n\nSecurity Notice:\nPlease keep your credentials safe and do not share them with anyone.\n\nWarm regards,\nTACHÈ Art Studio Team',
+      text: 'Hello Test User,\n\nWelcome to TACHÈ Art Studio! Your account has been successfully created.\n\nHere are your account login details:\n• Email: test.customer@gmail.com\n• Password: SamplePassword123\n\nYou can log in anytime at:\nhttps://tacheart.vercel.app/login\n\nSecurity Notice:\nPlease keep your credentials safe and do not share them with anyone.\n\nWarm regards,\nTACHÈ Art Studio Team',
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e8e3dc; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
           <div style="background-color: #fdfbf7; padding: 24px; text-align: center; border-bottom: 2px solid #8B1D1D;">
@@ -107,7 +107,7 @@ async function run() {
               </table>
             </div>
             <div style="margin: 24px 0; text-align: center;">
-              <a href="http://localhost:3000/login" style="display: inline-block; background-color: #8B1D1D; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">
+              <a href="https://tacheart.vercel.app/login" style="display: inline-block; background-color: #8B1D1D; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">
                 Log In to Your Account
               </a>
             </div>

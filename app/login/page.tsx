@@ -2,6 +2,7 @@ import LoginForm from "@/components/LoginForm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export default async function LoginPage() {
     const session = await getServerSession(authOptions);
@@ -12,7 +13,9 @@ export default async function LoginPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[var(--tache-cream)] pt-28 pb-12 sm:py-16 px-4 sm:px-6 lg:px-8">
-            <LoginForm />
+            <Suspense fallback={<div className="text-sm text-gray-400">Loading...</div>}>
+                <LoginForm />
+            </Suspense>
         </div>
     );
 }

@@ -12,6 +12,11 @@ import {
   ArrowRight,
   Sparkles,
   ShieldCheck,
+  KeyRound,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 
 interface Order {
@@ -37,6 +42,18 @@ export default function UserDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Password change states
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -69,6 +86,58 @@ export default function UserDashboardPage() {
     completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
     paid: "bg-emerald-50 text-emerald-700 border-emerald-200",
     cancelled: "bg-rose-50 text-rose-700 border-rose-200",
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    if (!currentPassword) {
+      setPasswordError("Please enter your current password.");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match.");
+      return;
+    }
+
+    setPasswordLoading(true);
+
+    try {
+      const res = await fetch("/api/user/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setPasswordError(data.error || "Failed to change password.");
+        setPasswordLoading(false);
+        return;
+      }
+
+      setPasswordSuccess("Password updated successfully!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordLoading(false);
+      setTimeout(() => {
+        setShowPasswordForm(false);
+        setPasswordSuccess("");
+      }, 3000);
+    } catch {
+      setPasswordError("An unexpected error occurred. Please try again.");
+      setPasswordLoading(false);
+    }
   };
 
   return (
@@ -172,34 +241,175 @@ export default function UserDashboardPage() {
 
       {/* Profile & Recent Activity Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-        {/* Account Card */}
-        <div className="bg-white p-5 sm:p-8 rounded-3xl border border-gray-100 space-y-6 shadow-sm">
-          <h3 className="text-xs font-bold tracking-widest text-[#2E292E] uppercase">
-            Collector Profile
-          </h3>
-          <div className="space-y-4 text-xs font-medium text-gray-600">
-            <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-gray-400">Email</span>
-              <span className="font-semibold text-gray-800">{session?.user?.email}</span>
+        {/* Left Column: Account Profile & Security */}
+        <div className="space-y-6">
+          {/* Account Profile Card */}
+          <div className="bg-white p-5 sm:p-8 rounded-3xl border border-gray-100 space-y-6 shadow-sm">
+            <h3 className="text-xs font-bold tracking-widest text-[#2E292E] uppercase">
+              Collector Profile
+            </h3>
+            <div className="space-y-4 text-xs font-medium text-gray-600">
+              <div className="flex justify-between py-2 border-b border-gray-100">
+                <span className="text-gray-400">Name</span>
+                <span className="font-semibold text-gray-800">{session?.user?.name || "—"}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-gray-100">
+                <span className="text-gray-400">Email</span>
+                <span className="font-semibold text-gray-800">{session?.user?.email}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-gray-100">
+                <span className="text-gray-400">Status</span>
+                <span className="text-brand-burgundy font-bold uppercase">Verified Collector</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-gray-100">
+                <span className="text-gray-400">Active Commissions</span>
+                <span>{orders.filter((o) => o.status !== "completed").length} Active</span>
+              </div>
             </div>
-            <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-gray-400">Status</span>
-              <span className="text-brand-burgundy font-bold uppercase">Verified Collector</span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-gray-400">Active Commissions</span>
-              <span>{orders.filter((o) => o.status !== "completed").length} Active</span>
-            </div>
+            <Link
+              href="/order"
+              className="block w-full py-3.5 bg-brand-burgundy text-white text-[10px] font-bold tracking-[0.25em] uppercase text-center rounded-sm hover:bg-[#2E292E] transition-all shadow-sm"
+            >
+              Commission Custom Artwork
+            </Link>
           </div>
-          <Link
-            href="/order"
-            className="block w-full py-3.5 bg-brand-burgundy text-white text-[10px] font-bold tracking-[0.25em] uppercase text-center rounded-sm hover:bg-[#2E292E] transition-all shadow-sm"
-          >
-            Commission Custom Artwork
-          </Link>
+
+          {/* Account Security / Change Password Card */}
+          <div className="bg-white p-5 sm:p-7 rounded-3xl border border-gray-100 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-brand-burgundy/10 text-brand-burgundy flex items-center justify-center">
+                  <KeyRound size={16} />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold tracking-widest text-[#2E292E] uppercase">
+                    Security & Password
+                  </h3>
+                  <p className="text-[10px] text-gray-400">Manage your login credentials</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPasswordForm(!showPasswordForm);
+                  setPasswordError("");
+                  setPasswordSuccess("");
+                }}
+                className="text-[10px] font-bold tracking-wider text-brand-burgundy hover:underline uppercase cursor-pointer"
+              >
+                {showPasswordForm ? "Cancel" : "Change"}
+              </button>
+            </div>
+
+            {/* Success Banner */}
+            {passwordSuccess && (
+              <div className="bg-emerald-50 text-emerald-700 p-3 rounded-lg text-xs border border-emerald-100 flex items-center gap-2">
+                <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
+                <span>{passwordSuccess}</span>
+              </div>
+            )}
+
+            {/* Error Banner */}
+            {passwordError && (
+              <div className="bg-red-50 text-red-600 p-3 rounded-lg text-xs border border-red-100 flex items-center gap-2">
+                <AlertCircle size={16} className="shrink-0 text-red-500" />
+                <span>{passwordError}</span>
+              </div>
+            )}
+
+            {/* Change Password Form */}
+            {showPasswordForm ? (
+              <form onSubmit={handlePasswordChange} className="space-y-3 pt-2">
+                <div>
+                  <label className="block text-[10px] font-bold tracking-wider uppercase text-gray-500 mb-1">
+                    Current Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showCurrent ? "text" : "password"}
+                      required
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      placeholder="Enter current password"
+                      className="w-full px-3 py-2 pr-9 text-xs border border-gray-200 rounded-md focus:outline-none focus:border-brand-burgundy"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrent(!showCurrent)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      tabIndex={-1}
+                    >
+                      {showCurrent ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold tracking-wider uppercase text-gray-500 mb-1">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showNew ? "text" : "password"}
+                      required
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Min. 6 characters"
+                      className="w-full px-3 py-2 pr-9 text-xs border border-gray-200 rounded-md focus:outline-none focus:border-brand-burgundy"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNew(!showNew)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      tabIndex={-1}
+                    >
+                      {showNew ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold tracking-wider uppercase text-gray-500 mb-1">
+                    Confirm New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirm ? "text" : "password"}
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Re-enter new password"
+                      className="w-full px-3 py-2 pr-9 text-xs border border-gray-200 rounded-md focus:outline-none focus:border-brand-burgundy"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm(!showConfirm)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      tabIndex={-1}
+                    >
+                      {showConfirm ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={passwordLoading}
+                  className="w-full mt-2 py-2.5 bg-[#2E292E] hover:bg-brand-burgundy text-white text-[10px] font-bold tracking-[0.2em] uppercase rounded-sm transition-all shadow-sm disabled:opacity-50 cursor-pointer"
+                >
+                  {passwordLoading ? "Updating Password..." : "Update Password"}
+                </button>
+              </form>
+            ) : (
+              <p className="text-xs text-gray-500">
+                Your account is protected. You can change your password anytime using the button above.
+              </p>
+            )}
+          </div>
         </div>
 
-        {/* Recent Activity */}
+        {/* Right Column: Recent Activity */}
         <div className="lg:col-span-2 bg-white p-5 sm:p-8 rounded-3xl border border-gray-100 space-y-6 shadow-sm">
           <div className="flex justify-between items-center">
             <h3 className="text-xs font-bold tracking-widest text-[#2E292E] uppercase">
